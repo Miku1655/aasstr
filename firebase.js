@@ -21,11 +21,11 @@ import {
 const firebaseConfig = {
   apiKey: "AIzaSyB1p4i6q4KLUYPxROYengaNi1a7h226LCI",
   authDomain: "asstr-f6536.firebaseapp.com",
-  databaseURL: "https://asstr-f6536-default-rtdb.firebaseio.com",
+  databaseURL: "https://asstr-f6536-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "asstr-f6536",
   storageBucket: "asstr-f6536.firebasestorage.app",
   messagingSenderId: "440031866116",
-  appId: "1:440031866116:web:06c79472a47f1fd4277451",
+  appId: "1:440031866116:web:06c79472a47f1fd4277451"
 };
 
 // ── Init ──────────────────────────────────
