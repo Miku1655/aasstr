@@ -7,9 +7,120 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inconsolata:wght@300;400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&family=Josefin+Sans:wght@300;400;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;600&family=Special+Elite&family=Abril+Fatface&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<style>
+  /* ── Auth Overlay ── */
+  #auth-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .auth-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 2.5rem 2rem; width: 100%; max-width: 380px;
+    border-radius: var(--radius);
+  }
+  .auth-logo {
+    font-family: var(--font-display); font-size: 1.4rem; font-weight: 300;
+    color: var(--gold); letter-spacing: 0.12em; text-align: center; margin-bottom: 0.25rem;
+  }
+  .auth-logo span { color: var(--accent2); }
+  .auth-tagline {
+    text-align: center; font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .auth-field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.9rem; }
+  .auth-label {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3);
+  }
+  .auth-input {
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+    padding: 0.55rem 0.75rem; font-family: var(--font-body); font-size: 1rem;
+    border-radius: var(--radius); outline: none; transition: border-color 0.15s;
+  }
+  .auth-input:focus { border-color: var(--accent); }
+  .auth-btn {
+    width: 100%; padding: 0.65rem; margin-top: 0.5rem; cursor: pointer;
+    font-family: var(--font-display); font-size: 0.9rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    background: var(--accent); border: 1px solid var(--accent); color: #fff;
+    border-radius: var(--radius); transition: all 0.2s;
+  }
+  .auth-btn:hover:not(:disabled) { background: var(--accent2); border-color: var(--accent2); }
+  .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .auth-btn-ghost {
+    width: 100%; padding: 0.55rem; margin-top: 0.35rem; cursor: pointer;
+    font-family: var(--font-display); font-size: 0.82rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: none; border: 1px solid var(--border); color: var(--text2);
+    border-radius: var(--radius); transition: all 0.2s;
+  }
+  .auth-btn-ghost:hover:not(:disabled) { border-color: var(--accent2); color: var(--accent3); }
+  .auth-btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+  .auth-error {
+    font-family: var(--font-mono); font-size: 0.75rem; color: #c46a7a;
+    min-height: 1.1em; margin-top: 0.4rem; text-align: center;
+  }
+  .auth-divider {
+    border: none; border-top: 1px solid var(--border); margin: 1rem 0;
+  }
+
+  /* ── Sync indicator ── */
+  #sync-indicator {
+    font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em;
+    padding: 0.2rem 0.6rem; border-radius: 20px;
+    border: 1px solid var(--border); cursor: default; user-select: none;
+    transition: all 0.3s; display: none;
+  }
+  #sync-indicator[data-status="synced"]  { color: #4caf80; border-color: #2a6b50; }
+  #sync-indicator[data-status="syncing"] { color: var(--text3); border-color: var(--border); }
+  #sync-indicator[data-status="offline"] { color: var(--text3); border-color: var(--border); }
+  #sync-indicator[data-status="error"]   { color: #c46a7a; border-color: #5a1a22; }
+
+  /* ── User chip ── */
+  #user-chip {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--text3);
+  }
+  #user-email-display {
+    max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .signout-btn {
+    background: none; border: 1px solid var(--border); color: var(--text3);
+    padding: 0.2rem 0.55rem; font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.08em; cursor: pointer; border-radius: var(--radius);
+    transition: all 0.15s;
+  }
+  .signout-btn:hover { border-color: #5a1a22; color: #c46a7a; }
+</style>
 </head>
 <body data-theme="crimson" data-layout="default" data-cards="default">
-<div id="app">
+
+<!-- ── Auth Overlay (shown until signed in) ── -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <div class="auth-logo">The <span>Private</span> Library</div>
+    <div class="auth-tagline">Sign in to sync your library</div>
+    <div class="auth-field">
+      <label class="auth-label">Email</label>
+      <input type="email" class="auth-input" id="auth-email" placeholder="you@example.com"
+             onkeydown="if(event.key==='Enter')fbSignIn()">
+    </div>
+    <div class="auth-field">
+      <label class="auth-label">Password</label>
+      <input type="password" class="auth-input" id="auth-password" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter')fbSignIn()">
+    </div>
+    <div class="auth-error" id="auth-error"></div>
+    <button class="auth-btn" id="auth-submit" onclick="fbSignIn()">Sign In</button>
+    <hr class="auth-divider">
+    <button class="auth-btn-ghost" id="auth-register-btn" onclick="fbRegister()">Create Account</button>
+  </div>
+</div>
+
+<!-- ── Main App (hidden until signed in) ── -->
+<div id="app" style="display:none">
 
 <!-- ── Header ── -->
 <header id="header">
@@ -21,6 +132,11 @@
     <input type="text" id="search-input" placeholder="Search titles, authors, tags…" oninput="handleSearch(this.value)">
   </div>
   <div id="header-actions">
+    <span id="sync-indicator" data-status="syncing">◌ Syncing…</span>
+    <div id="user-chip">
+      <span id="user-email-display"></span>
+      <button class="signout-btn" onclick="fbSignOut()">Sign out</button>
+    </div>
     <button class="hbtn hbtn-ghost" onclick="showModal('io-modal')">Import / Export</button>
     <button class="hbtn hbtn-ghost" onclick="showView('admin')" title="Admin Panel">⚙ Admin</button>
     <button class="hbtn hbtn-solid" onclick="openEditor()">+ Add Story</button>
@@ -303,9 +419,10 @@
 <!-- Toast -->
 <div id="toast"></div>
 
-<!-- Scripts (order matters: data → settings → app) -->
+<!-- Scripts: data + settings + app load as classic scripts, firebase as ES module -->
 <script src="data.js"></script>
 <script src="settings.js"></script>
 <script src="app.js"></script>
+<script type="module" src="firebase.js"></script>
 </body>
 </html>

@@ -60,15 +60,19 @@ function highlight(text, query) {
 }
 
 // ═══════════════════════════════════════════
-//  DATA LAYER
+//  DATA LAYER  (localStorage + Firebase)
 // ═══════════════════════════════════════════
 function loadData() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
   catch { return []; }
 }
+
 function saveData(stories) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(stories));
+  // Push to Firebase if signed in
+  if (window.fbSaveStories) window.fbSaveStories(stories);
 }
+
 function loadSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
@@ -81,8 +85,11 @@ function loadSettings() {
     };
   } catch { return { ...DEFAULT_SETTINGS, categories: [...DEFAULT_CATEGORIES] }; }
 }
+
 function saveSettings() {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+  // Push to Firebase if signed in
+  if (window.fbSaveSettings) window.fbSaveSettings(state.settings);
 }
 
 // ═══════════════════════════════════════════
