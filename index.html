@@ -93,6 +93,13 @@
     transition: all 0.15s;
   }
   .signout-btn:hover { border-color: #5a1a22; color: #c46a7a; }
+
+  /* ── Theme editor modal sizing ── */
+  #theme-editor-modal .modal {
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
 </style>
 </head>
 <body data-theme="crimson" data-layout="default" data-cards="default">
@@ -144,261 +151,275 @@
 </header>
 
 <div id="main">
-  <!-- ── Sidebar ── -->
-  <nav id="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">Browse</div>
-      <div class="sidebar-item active" id="nav-all" onclick="filterCategory(null)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        All Stories <span class="sidebar-count" id="count-all">0</span>
-      </div>
-      <div class="sidebar-item" id="nav-favs" onclick="filterFavorites()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        Favorites <span class="sidebar-count" id="count-favs">0</span>
-      </div>
-      <div class="sidebar-item" id="nav-unread" onclick="filterUnread()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        Unread <span class="sidebar-count" id="count-unread">0</span>
-      </div>
-      <div class="sidebar-item" id="nav-tags" onclick="showView('tags')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-        Tag Cloud
-      </div>
-    </div>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section" id="sidebar-categories">
-      <div class="sidebar-label">Categories</div>
-    </div>
-  </nav>
+  <!-- ── Top Nav (visible only in no-sidebar layout) ── -->
+  <nav id="top-nav" style="display:none"></nav>
 
-  <!-- ── Content ── -->
-  <div id="content">
-
-    <!-- Library View -->
-    <div id="view-library" class="view">
-      <div class="stats-bar" id="stats-bar"></div>
-      <div class="library-header">
-        <h1 class="library-title" id="library-title">All Stories</h1>
-        <span class="library-subtitle" id="library-subtitle"></span>
-      </div>
-      <div class="toolbar" id="toolbar">
-        <select class="sort-select" id="sort-select" onchange="handleSort(this.value)">
-          <option value="date-desc">Newest first</option>
-          <option value="date-asc">Oldest first</option>
-          <option value="title-asc">Title A–Z</option>
-          <option value="alpha-author">By author</option>
-          <option value="wc-desc">Longest first</option>
-          <option value="wc-asc">Shortest first</option>
-        </select>
-        <div id="active-filters"></div>
-      </div>
-      <div class="story-grid" id="story-grid"></div>
-      <div class="ornament" id="ornament" style="display:none">✦ ✦ ✦</div>
-    </div>
-
-    <!-- Reader View -->
-    <div id="view-reader" class="view">
-      <div class="reader-nav">
-        <button class="back-btn" onclick="showView('library')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Back to Library
-        </button>
-        <div class="reader-font-controls">
-          <span>Aa</span>
-          <div class="font-btn" onclick="changeFontSize(-1)">−</div>
-          <div class="font-btn" onclick="changeFontSize(1)">+</div>
+  <div id="main-inner">
+    <!-- ── Sidebar ── -->
+    <nav id="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Browse</div>
+        <div class="sidebar-item active" id="nav-all" onclick="filterCategory(null)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          All Stories <span class="sidebar-count" id="count-all">0</span>
         </div>
-        <button class="mode-toggle" onclick="toggleReadingMode()" id="mode-btn">☀ Light</button>
-        <div class="reader-actions">
-          <button class="back-btn" id="reader-edit-btn" onclick="editCurrentStory()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Edit
+        <div class="sidebar-item" id="nav-favs" onclick="filterFavorites()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Favorites <span class="sidebar-count" id="count-favs">0</span>
+        </div>
+        <div class="sidebar-item" id="nav-unread" onclick="filterUnread()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Unread <span class="sidebar-count" id="count-unread">0</span>
+        </div>
+        <div class="sidebar-item" id="nav-tags" onclick="showView('tags')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Tag Cloud
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section" id="sidebar-categories">
+        <div class="sidebar-label">Categories</div>
+      </div>
+    </nav>
+
+    <!-- ── Content ── -->
+    <div id="content">
+
+      <!-- Library View -->
+      <div id="view-library" class="view">
+        <div class="stats-bar" id="stats-bar"></div>
+        <div class="library-header">
+          <h1 class="library-title" id="library-title">All Stories</h1>
+          <span class="library-subtitle" id="library-subtitle"></span>
+        </div>
+        <div class="toolbar" id="toolbar">
+          <select class="sort-select" id="sort-select" onchange="handleSort(this.value)">
+            <option value="date-desc">Newest first</option>
+            <option value="date-asc">Oldest first</option>
+            <option value="title-asc">Title A–Z</option>
+            <option value="alpha-author">By author</option>
+            <option value="wc-desc">Longest first</option>
+            <option value="wc-asc">Shortest first</option>
+          </select>
+          <div id="active-filters"></div>
+        </div>
+        <div class="story-grid" id="story-grid"></div>
+        <div class="ornament" id="ornament" style="display:none">✦ ✦ ✦</div>
+      </div>
+
+      <!-- Reader View -->
+      <div id="view-reader" class="view">
+        <div class="reader-nav">
+          <button class="back-btn" onclick="showView('library')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Back to Library
+          </button>
+          <div class="reader-font-controls">
+            <span>Aa</span>
+            <div class="font-btn" onclick="changeFontSize(-1)">−</div>
+            <div class="font-btn" onclick="changeFontSize(1)">+</div>
+          </div>
+          <button class="mode-toggle" onclick="toggleReadingMode()" id="mode-btn">☀ Light</button>
+          <div class="reader-actions">
+            <button class="back-btn" id="reader-edit-btn" onclick="editCurrentStory()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+          </div>
+        </div>
+        <div class="reader-header">
+          <div class="reader-category" id="reader-category"></div>
+          <h1 class="reader-title" id="reader-title"></h1>
+          <div class="reader-author" id="reader-author"></div>
+          <div class="reader-meta">
+            <span id="reader-wc"></span>
+            <span id="reader-date"></span>
+            <div class="reader-tags" id="reader-tags"></div>
+            <div class="stars" id="reader-stars"></div>
+          </div>
+        </div>
+        <div class="reader-body-wrapper reader-font-s3" id="reader-body-wrapper">
+          <div class="reader-body" id="reader-body"></div>
+        </div>
+      </div>
+
+      <!-- Editor View -->
+      <div id="view-editor" class="view">
+        <div class="editor-header">
+          <button class="back-btn" onclick="cancelEditor()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Cancel
+          </button>
+          <h1 class="editor-title-text" id="editor-title-text">Add New Story</h1>
+          <div id="editor-delete-btn" style="margin-left:auto;display:none">
+            <button class="btn btn-danger" onclick="deleteCurrentStory()">Delete Story</button>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">Title</label>
+            <input type="text" class="form-input" id="f-title" placeholder="Story title…">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Author</label>
+            <input type="text" class="form-input" id="f-author" placeholder="Author name or pseudonym…">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="f-category">
+              <option value="">Select category…</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Summary</label>
+            <textarea class="form-textarea" id="f-summary" placeholder="Brief description or teaser…" rows="3"></textarea>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Tags <span class="form-hint">(comma-separated)</span></label>
+            <input type="text" class="form-input" id="f-tags" placeholder="e.g. slow burn, power dynamics, explicit…">
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Story Content</label>
+            <textarea class="form-textarea" id="content-textarea" placeholder="Paste or write your story here…"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="saveStory()">Save Story</button>
+          <button class="btn btn-secondary" onclick="cancelEditor()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Tag Cloud View -->
+      <div id="view-tags" class="view">
+        <div class="library-header">
+          <h1 class="library-title">Tag Cloud</h1>
+        </div>
+        <div class="tag-cloud" id="tag-cloud"></div>
+      </div>
+
+      <!-- Author View -->
+      <div id="view-author" class="view">
+        <div class="reader-nav">
+          <button class="back-btn" onclick="showView('library')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Back to Library
           </button>
         </div>
-      </div>
-      <div class="reader-header">
-        <div class="reader-category" id="reader-category"></div>
-        <h1 class="reader-title" id="reader-title"></h1>
-        <div class="reader-author" id="reader-author"></div>
-        <div class="reader-meta">
-          <span id="reader-wc"></span>
-          <span id="reader-date"></span>
-          <div class="reader-tags" id="reader-tags"></div>
-          <div class="stars" id="reader-stars"></div>
+        <div class="author-header">
+          <div class="author-name" id="author-name"></div>
+          <div class="author-subtitle" id="author-subtitle"></div>
         </div>
+        <div class="story-grid" id="author-grid"></div>
       </div>
-      <div class="reader-body-wrapper reader-font-s3" id="reader-body-wrapper">
-        <div class="reader-body" id="reader-body"></div>
-      </div>
-    </div>
 
-    <!-- Editor View -->
-    <div id="view-editor" class="view">
-      <div class="editor-header">
-        <button class="back-btn" onclick="cancelEditor()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Cancel
-        </button>
-        <h1 class="editor-title-text" id="editor-title-text">Add New Story</h1>
-        <div id="editor-delete-btn" style="margin-left:auto;display:none">
-          <button class="btn btn-danger" onclick="deleteCurrentStory()">Delete Story</button>
+      <!-- Admin View -->
+      <div id="view-admin" class="view">
+        <div class="admin-header">
+          <button class="back-btn" onclick="showView('library')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Back to Library
+          </button>
+          <h1 class="admin-title">Site Administration</h1>
         </div>
-      </div>
-      <div class="form-grid">
-        <div class="form-group full">
-          <label class="form-label">Title</label>
-          <input type="text" class="form-input" id="f-title" placeholder="Story title…">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Author</label>
-          <input type="text" class="form-input" id="f-author" placeholder="Author name or pseudonym…">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Category</label>
-          <select class="form-select" id="f-category">
-            <option value="">Select category…</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label class="form-label">Summary</label>
-          <textarea class="form-textarea" id="f-summary" placeholder="Brief description or teaser…" rows="3"></textarea>
-        </div>
-        <div class="form-group full">
-          <label class="form-label">Tags <span class="form-hint">(comma-separated)</span></label>
-          <input type="text" class="form-input" id="f-tags" placeholder="e.g. slow burn, power dynamics, explicit…">
-        </div>
-        <div class="form-group full">
-          <label class="form-label">Story Content</label>
-          <textarea class="form-textarea" id="content-textarea" placeholder="Paste or write your story here…"></textarea>
-        </div>
-      </div>
-      <div class="form-actions">
-        <button class="btn btn-primary" onclick="saveStory()">Save Story</button>
-        <button class="btn btn-secondary" onclick="cancelEditor()">Cancel</button>
-      </div>
-    </div>
+        <div class="admin-sections">
 
-    <!-- Tag Cloud View -->
-    <div id="view-tags" class="view">
-      <div class="library-header">
-        <h1 class="library-title">Tag Cloud</h1>
-      </div>
-      <div class="tag-cloud" id="tag-cloud"></div>
-    </div>
-
-    <!-- Author View -->
-    <div id="view-author" class="view">
-      <div class="reader-nav">
-        <button class="back-btn" onclick="showView('library')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Back to Library
-        </button>
-      </div>
-      <div class="author-header">
-        <div class="author-name" id="author-name"></div>
-        <div class="author-subtitle" id="author-subtitle"></div>
-      </div>
-      <div class="story-grid" id="author-grid"></div>
-    </div>
-
-    <!-- Admin View -->
-    <div id="view-admin" class="view">
-      <div class="admin-header">
-        <button class="back-btn" onclick="showView('library')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Back to Library
-        </button>
-        <h1 class="admin-title">Site Administration</h1>
-      </div>
-      <div class="admin-sections">
-
-        <div class="admin-section">
-          <div class="admin-section-title">Site Identity</div>
-          <div class="form-group" style="margin-bottom:1rem">
-            <label class="form-label">Site Name</label>
-            <div class="site-name-row">
-              <input type="text" class="site-name-input" id="admin-site-name" placeholder="The Private Library">
-              <button class="btn btn-primary" onclick="saveSiteName()" style="white-space:nowrap">Apply</button>
+          <div class="admin-section">
+            <div class="admin-section-title">Site Identity</div>
+            <div class="form-group" style="margin-bottom:1rem">
+              <label class="form-label">Site Name</label>
+              <div class="site-name-row">
+                <input type="text" class="site-name-input" id="admin-site-name" placeholder="The Private Library">
+                <button class="btn btn-primary" onclick="saveSiteName()" style="white-space:nowrap">Apply</button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="admin-section">
-          <div class="admin-section-title">Visual Theme</div>
-          <div class="theme-grid" id="theme-grid"></div>
-        </div>
-
-        <div class="admin-section">
-          <div class="admin-section-title">Layout</div>
-          <div style="margin-bottom:1rem">
-            <div class="form-label" style="margin-bottom:0.5rem">Sidebar Width</div>
-            <div class="layout-grid" id="layout-grid">
-              <button class="layout-btn active" data-layout="default"   onclick="setLayout('default',this)">Default</button>
-              <button class="layout-btn"        data-layout="wide"      onclick="setLayout('wide',this)">Wide Sidebar</button>
-              <button class="layout-btn"        data-layout="compact"   onclick="setLayout('compact',this)">Compact Sidebar</button>
-              <button class="layout-btn"        data-layout="nosidebar" onclick="setLayout('nosidebar',this)">No Sidebar</button>
+          <div class="admin-section">
+            <div class="admin-section-title">Visual Theme</div>
+            <div class="theme-grid" id="theme-grid">
+              <!-- populated by renderAdmin() -->
+            </div>
+            <!-- Add Custom Theme button -->
+            <div style="margin-top:0.75rem">
+              <button class="btn btn-secondary" onclick="openThemeEditor(null)" style="display:inline-flex;align-items:center;gap:0.4rem">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Create Custom Theme
+              </button>
             </div>
           </div>
-          <div>
-            <div class="form-label" style="margin-bottom:0.5rem">Card Style</div>
-            <div class="layout-grid" id="cards-grid">
-              <button class="layout-btn active" data-cards="default" onclick="setCards('default',this)">Standard Grid</button>
-              <button class="layout-btn"        data-cards="large"   onclick="setCards('large',this)">Large Cards</button>
-              <button class="layout-btn"        data-cards="compact" onclick="setCards('compact',this)">Compact Grid</button>
-              <button class="layout-btn"        data-cards="list"    onclick="setCards('list',this)">List View</button>
+
+          <div class="admin-section">
+            <div class="admin-section-title">Layout</div>
+            <div style="margin-bottom:1rem">
+              <div class="form-label" style="margin-bottom:0.5rem">Sidebar Width</div>
+              <div class="layout-grid" id="layout-grid">
+                <button class="layout-btn active" data-layout="default"   onclick="setLayout('default',this)">Default</button>
+                <button class="layout-btn"        data-layout="wide"      onclick="setLayout('wide',this)">Wide Sidebar</button>
+                <button class="layout-btn"        data-layout="compact"   onclick="setLayout('compact',this)">Compact Sidebar</button>
+                <button class="layout-btn"        data-layout="nosidebar" onclick="setLayout('nosidebar',this)">No Sidebar</button>
+              </div>
+            </div>
+            <div>
+              <div class="form-label" style="margin-bottom:0.5rem">Card Style</div>
+              <div class="layout-grid" id="cards-grid">
+                <button class="layout-btn active" data-cards="default" onclick="setCards('default',this)">Standard Grid</button>
+                <button class="layout-btn"        data-cards="large"   onclick="setCards('large',this)">Large Cards</button>
+                <button class="layout-btn"        data-cards="compact" onclick="setCards('compact',this)">Compact Grid</button>
+                <button class="layout-btn"        data-cards="list"    onclick="setCards('list',this)">List View</button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="admin-section">
-          <div class="admin-section-title">Categories</div>
-          <div class="cat-list" id="admin-cat-list"></div>
-          <div class="cat-add-row">
-            <input type="text" class="cat-add-input" id="new-cat-input" placeholder="New category name…" onkeydown="if(event.key==='Enter')addCategory()">
-            <button class="cat-add-btn" onclick="addCategory()">Add</button>
+          <div class="admin-section">
+            <div class="admin-section-title">Categories</div>
+            <div class="cat-list" id="admin-cat-list"></div>
+            <div class="cat-add-row">
+              <input type="text" class="cat-add-input" id="new-cat-input" placeholder="New category name…" onkeydown="if(event.key==='Enter')addCategory()">
+              <button class="cat-add-btn" onclick="addCategory()">Add</button>
+            </div>
           </div>
-        </div>
 
-        <div class="admin-section">
-          <div class="admin-section-title">Options</div>
-          <div class="option-row">
-            <div><div class="option-label">Show Word Count on Cards</div><div class="option-desc">Display estimated word count on each story card</div></div>
-            <label class="toggle-switch"><input type="checkbox" id="opt-wordcount" checked onchange="saveOptions()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          <div class="admin-section">
+            <div class="admin-section-title">Options</div>
+            <div class="option-row">
+              <div><div class="option-label">Show Word Count on Cards</div><div class="option-desc">Display estimated word count on each story card</div></div>
+              <label class="toggle-switch"><input type="checkbox" id="opt-wordcount" checked onchange="saveOptions()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            </div>
+            <div class="option-row">
+              <div><div class="option-label">Show Reading Progress Bar</div><div class="option-desc">Track and display how much of each story has been read</div></div>
+              <label class="toggle-switch"><input type="checkbox" id="opt-progress" checked onchange="saveOptions()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            </div>
+            <div class="option-row">
+              <div><div class="option-label">Show Star Ratings</div><div class="option-desc">Allow rating stories 1–5 stars in the reader</div></div>
+              <label class="toggle-switch"><input type="checkbox" id="opt-ratings" checked onchange="saveOptions()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            </div>
+            <div class="option-row">
+              <div><div class="option-label">Compact Header</div><div class="option-desc">Reduce the top bar height to save screen space</div></div>
+              <label class="toggle-switch"><input type="checkbox" id="opt-compact-header" onchange="saveOptions();applyOptions()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            </div>
+            <div class="option-row">
+              <div><div class="option-label">Stats Bar</div><div class="option-desc">Show library statistics at the top of the collection view</div></div>
+              <label class="toggle-switch"><input type="checkbox" id="opt-stats" checked onchange="saveOptions();applyOptions()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            </div>
           </div>
-          <div class="option-row">
-            <div><div class="option-label">Show Reading Progress Bar</div><div class="option-desc">Track and display how much of each story has been read</div></div>
-            <label class="toggle-switch"><input type="checkbox" id="opt-progress" checked onchange="saveOptions()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-          </div>
-          <div class="option-row">
-            <div><div class="option-label">Show Star Ratings</div><div class="option-desc">Allow rating stories 1–5 stars in the reader</div></div>
-            <label class="toggle-switch"><input type="checkbox" id="opt-ratings" checked onchange="saveOptions()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-          </div>
-          <div class="option-row">
-            <div><div class="option-label">Compact Header</div><div class="option-desc">Reduce the top bar height to save screen space</div></div>
-            <label class="toggle-switch"><input type="checkbox" id="opt-compact-header" onchange="saveOptions();applyOptions()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-          </div>
-          <div class="option-row">
-            <div><div class="option-label">Stats Bar</div><div class="option-desc">Show library statistics at the top of the collection view</div></div>
-            <label class="toggle-switch"><input type="checkbox" id="opt-stats" checked onchange="saveOptions();applyOptions()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-          </div>
-        </div>
 
-        <div class="admin-section">
-          <div class="admin-section-title">Danger Zone</div>
-          <div class="option-row">
-            <div><div class="option-label" style="color:#c46a7a">Reset All Settings</div><div class="option-desc">Restore defaults for theme, layout, and categories</div></div>
-            <button class="btn btn-danger" onclick="resetSettings()">Reset Settings</button>
+          <div class="admin-section">
+            <div class="admin-section-title">Danger Zone</div>
+            <div class="option-row">
+              <div><div class="option-label" style="color:#c46a7a">Reset All Settings</div><div class="option-desc">Restore defaults for theme, layout, and categories</div></div>
+              <button class="btn btn-danger" onclick="resetSettings()">Reset Settings</button>
+            </div>
+            <div class="option-row">
+              <div><div class="option-label" style="color:#c46a7a">Clear All Stories</div><div class="option-desc">Permanently delete all stories from the library</div></div>
+              <button class="btn btn-danger" onclick="clearAllStories()">Clear Library</button>
+            </div>
           </div>
-          <div class="option-row">
-            <div><div class="option-label" style="color:#c46a7a">Clear All Stories</div><div class="option-desc">Permanently delete all stories from the library</div></div>
-            <button class="btn btn-danger" onclick="clearAllStories()">Clear Library</button>
-          </div>
-        </div>
 
-      </div><!-- /admin-sections -->
-    </div><!-- /view-admin -->
+        </div><!-- /admin-sections -->
+      </div><!-- /view-admin -->
 
-  </div><!-- /content -->
+    </div><!-- /content -->
+  </div><!-- /main-inner -->
 </div><!-- /main -->
 </div><!-- /app -->
 
@@ -416,6 +437,167 @@
   </div>
 </div>
 
+<!-- Theme Editor Modal -->
+<div class="modal-overlay" id="theme-editor-modal">
+  <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto">
+    <h2 id="te-modal-title">Create Theme</h2>
+
+    <!-- Name -->
+    <div class="te-field" style="margin-bottom:1rem">
+      <label class="te-label">Theme Name</label>
+      <input type="text" class="te-name-input" id="te-name" placeholder="My Custom Theme" oninput="syncThemePreview()">
+    </div>
+
+    <!-- Quick presets -->
+    <div class="te-field" style="margin-bottom:1.25rem">
+      <label class="te-label">Quick-start from built-in</label>
+      <div class="te-presets" id="te-presets">
+        <!-- injected by JS -->
+      </div>
+    </div>
+
+    <div class="te-layout">
+      <!-- Color fields -->
+      <div class="te-fields">
+        <label class="te-label" style="margin-bottom:0.25rem">Colors</label>
+        <div class="te-color-grid">
+
+          <div class="te-color-row">
+            <div class="te-color-swatch" id="swatch-bg">
+              <div class="te-color-swatch-inner" id="swatch-bg-inner"></div>
+              <input type="color" id="te-bg-picker" oninput="onPickerChange('bg',this.value)">
+            </div>
+            <div style="flex:1">
+              <div class="te-label" style="margin-bottom:2px">Background</div>
+              <input type="text" class="te-color-hex" id="te-bg" placeholder="#0c0a0b"
+                     oninput="onHexChange('bg',this.value)" onblur="normalizeHex('bg')">
+            </div>
+          </div>
+
+          <div class="te-color-row">
+            <div class="te-color-swatch" id="swatch-bg2">
+              <div class="te-color-swatch-inner" id="swatch-bg2-inner"></div>
+              <input type="color" id="te-bg2-picker" oninput="onPickerChange('bg2',this.value)">
+            </div>
+            <div style="flex:1">
+              <div class="te-label" style="margin-bottom:2px">Surface</div>
+              <input type="text" class="te-color-hex" id="te-bg2" placeholder="#131013"
+                     oninput="onHexChange('bg2',this.value)" onblur="normalizeHex('bg2')">
+            </div>
+          </div>
+
+          <div class="te-color-row">
+            <div class="te-color-swatch" id="swatch-border">
+              <div class="te-color-swatch-inner" id="swatch-border-inner"></div>
+              <input type="color" id="te-border-picker" oninput="onPickerChange('border',this.value)">
+            </div>
+            <div style="flex:1">
+              <div class="te-label" style="margin-bottom:2px">Border</div>
+              <input type="text" class="te-color-hex" id="te-border" placeholder="#2e2530"
+                     oninput="onHexChange('border',this.value)" onblur="normalizeHex('border')">
+            </div>
+          </div>
+
+          <div class="te-color-row">
+            <div class="te-color-swatch" id="swatch-accent">
+              <div class="te-color-swatch-inner" id="swatch-accent-inner"></div>
+              <input type="color" id="te-accent-picker" oninput="onPickerChange('accent',this.value)">
+            </div>
+            <div style="flex:1">
+              <div class="te-label" style="margin-bottom:2px">Accent</div>
+              <input type="text" class="te-color-hex" id="te-accent" placeholder="#9b2335"
+                     oninput="onHexChange('accent',this.value)" onblur="normalizeHex('accent')">
+            </div>
+          </div>
+
+          <div class="te-color-row">
+            <div class="te-color-swatch" id="swatch-gold">
+              <div class="te-color-swatch-inner" id="swatch-gold-inner"></div>
+              <input type="color" id="te-gold-picker" oninput="onPickerChange('gold',this.value)">
+            </div>
+            <div style="flex:1">
+              <div class="te-label" style="margin-bottom:2px">Highlight / Gold</div>
+              <input type="text" class="te-color-hex" id="te-gold" placeholder="#c4a265"
+                     oninput="onHexChange('gold',this.value)" onblur="normalizeHex('gold')">
+            </div>
+          </div>
+
+          <div class="te-color-row">
+            <div class="te-color-swatch" id="swatch-text">
+              <div class="te-color-swatch-inner" id="swatch-text-inner"></div>
+              <input type="color" id="te-text-picker" oninput="onPickerChange('text',this.value)">
+            </div>
+            <div style="flex:1">
+              <div class="te-label" style="margin-bottom:2px">Text</div>
+              <input type="text" class="te-color-hex" id="te-text" placeholder="#e2d8d0"
+                     oninput="onHexChange('text',this.value)" onblur="normalizeHex('text')">
+            </div>
+          </div>
+
+        </div>
+        <p style="font-size:0.78rem;color:var(--text3);font-style:italic;margin-top:0.5rem">
+          Shades and derived colors (surface variants, accent highlights) are generated automatically.
+        </p>
+      </div>
+
+      <!-- Live preview -->
+      <div class="te-preview-panel">
+        <label class="te-label">Live Preview</label>
+        <div id="te-preview-card">
+          <!-- Header bar -->
+          <div class="te-preview-header" style="background:var(--bg2);border-bottom:1px solid var(--border)">
+            <div style="font-family:var(--font-display);font-size:0.8rem;color:var(--gold);letter-spacing:0.1em">The Library</div>
+          </div>
+          <!-- Sidebar + content -->
+          <div class="te-preview-sidebar-area" style="background:var(--bg)">
+            <div class="te-preview-sidebar" style="background:var(--bg2)">
+              <div class="te-preview-sb-item active-sb" style="background:var(--accent2);height:10px"></div>
+              <div class="te-preview-sb-item" style="background:var(--border);height:10px"></div>
+              <div class="te-preview-sb-item" style="background:var(--border);height:10px"></div>
+            </div>
+            <div class="te-preview-content">
+              <div style="background:var(--bg2);border:1px solid var(--border);padding:0.5rem;border-radius:1px;position:relative;overflow:hidden">
+                <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--accent2);margin-bottom:3px;letter-spacing:0.1em">ROMANCE</div>
+                <div style="font-family:var(--font-display);font-size:0.75rem;color:var(--text);margin-bottom:2px">The Midnight Garden</div>
+                <div style="font-size:0.6rem;color:var(--text3);font-style:italic;margin-bottom:4px">by Elara Voss</div>
+                <div style="font-size:0.58rem;color:var(--text2);line-height:1.4">A botanist discovers a secret garden…</div>
+                <div style="display:flex;gap:3px;margin-top:5px">
+                  <div style="background:var(--accent);opacity:0.2;width:2px;position:absolute;left:0;top:0;bottom:0"></div>
+                  <div style="font-size:0.5rem;color:var(--accent3);border:1px solid var(--accent);opacity:0.5;padding:0 3px;border-radius:1px">slow burn</div>
+                  <div style="font-size:0.5rem;color:var(--accent3);border:1px solid var(--accent);opacity:0.5;padding:0 3px;border-radius:1px">mystery</div>
+                </div>
+                <div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--border)">
+                  <div style="width:60%;height:100%;background:var(--accent2)"></div>
+                </div>
+              </div>
+              <div style="font-family:var(--font-display);font-size:0.65rem;color:var(--gold);margin-top:2px">★★★★☆</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Swatch summary -->
+        <div id="te-swatch-preview" class="swatch-preview" style="border:1px solid var(--border);border-radius:2px;margin-top:0.5rem">
+          <div class="swatch-bar"></div>
+          <div class="swatch-body">
+            <div class="swatch-sidebar"></div>
+            <div class="swatch-content">
+              <div class="swatch-line" style="width:70%"></div>
+              <div class="swatch-line" style="width:100%"></div>
+              <div class="swatch-line" style="width:85%"></div>
+              <div class="swatch-line" style="width:40%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+      <button class="btn btn-primary" onclick="saveCustomTheme()">Save Theme</button>
+      <button class="btn btn-secondary" onclick="closeModal('theme-editor-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -424,5 +606,97 @@
 <script src="settings.js"></script>
 <script src="app.js"></script>
 <script type="module" src="firebase.js"></script>
+
+<script>
+// ═══════════════════════════════════════════
+//  THEME EDITOR — inline color sync helpers
+// ═══════════════════════════════════════════
+const COLOR_FIELDS = ['bg','bg2','border','accent','gold','text'];
+
+function updateSwatchUI(field, hex) {
+  const inner = document.getElementById('swatch-' + field + '-inner');
+  if (inner) inner.style.background = hex;
+  const picker = document.getElementById('te-' + field + '-picker');
+  if (picker) picker.value = hex;
+}
+
+function onPickerChange(field, hex) {
+  const hexInput = document.getElementById('te-' + field);
+  if (hexInput) hexInput.value = hex.toUpperCase();
+  updateSwatchUI(field, hex);
+  syncThemePreview();
+}
+
+function onHexChange(field, val) {
+  const clean = val.trim();
+  if (/^#[0-9A-Fa-f]{6}$/.test(clean)) {
+    updateSwatchUI(field, clean);
+    syncThemePreview();
+  }
+}
+
+function normalizeHex(field) {
+  const input = document.getElementById('te-' + field);
+  if (!input) return;
+  let v = input.value.trim();
+  if (!v.startsWith('#')) v = '#' + v;
+  if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+    input.value = v.toUpperCase();
+    updateSwatchUI(field, v);
+    syncThemePreview();
+  }
+}
+
+// Populate preset buttons when admin loads
+function renderThemePresets() {
+  const el = document.getElementById('te-presets');
+  if (!el) return;
+  el.innerHTML = THEMES.map(t =>
+    `<button class="te-preset-btn" onclick="loadPreset('${t.id}')">
+      <span class="te-preset-dot" style="background:${t.accent}"></span>
+      ${t.name}
+    </button>`
+  ).join('');
+}
+
+function loadPreset(id) {
+  const t = THEMES.find(x => x.id === id);
+  if (!t || !_editingTheme) return;
+  // Keep existing ID and name, just copy colors
+  _editingTheme.bg     = t.bg;
+  _editingTheme.bg2    = t.bg2;
+  _editingTheme.border = t.border;
+  _editingTheme.accent = t.accent;
+  _editingTheme.gold   = t.gold;
+  _editingTheme.text   = t.text || '#e2d8d0';
+  // Update inputs
+  document.getElementById('te-bg').value     = t.bg.toUpperCase();
+  document.getElementById('te-bg2').value    = t.bg2.toUpperCase();
+  document.getElementById('te-border').value = t.border.toUpperCase();
+  document.getElementById('te-accent').value = t.accent.toUpperCase();
+  document.getElementById('te-gold').value   = t.gold.toUpperCase();
+  document.getElementById('te-text').value   = (t.text || '#e2d8d0').toUpperCase();
+  COLOR_FIELDS.forEach(f => {
+    const val = document.getElementById('te-' + f).value;
+    updateSwatchUI(f, val);
+  });
+  syncThemePreview();
+}
+
+// Initialize swatch backgrounds whenever the modal opens
+const _origOpenThemeEditor = window.openThemeEditor;
+// Override to also update swatches + presets
+window.openThemeEditor = function(id) {
+  if (typeof _origOpenThemeEditor === 'function') _origOpenThemeEditor.call(this, id);
+  // Done in settings.js openThemeEditor — now sync swatch visuals
+  setTimeout(() => {
+    COLOR_FIELDS.forEach(f => {
+      const val = (document.getElementById('te-' + f) || {}).value;
+      if (val) updateSwatchUI(f, val);
+    });
+    renderThemePresets();
+  }, 0);
+};
+</script>
 </body>
 </html>

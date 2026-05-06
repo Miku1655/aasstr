@@ -10,6 +10,7 @@ function showView(name) {
   });
   state.view = name;
   updateSidebar();
+  renderTopNav();
   if (name === 'library') renderLibrary();
   if (name === 'tags')    renderTagCloud();
   if (name === 'admin')   renderAdmin();

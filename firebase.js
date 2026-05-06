@@ -35,8 +35,8 @@ const db    = getDatabase(fbApp);
 
 // ── State ─────────────────────────────────
 window.fbUser        = null;
-window.fbListeners   = {};   // active onValue listeners so we can detach
-let   _remotePause   = false; // prevents write-loops when we receive remote data
+window.fbListeners   = {};
+let   _remotePause   = false;
 
 // ── Helpers ──────────────────────────────
 function userRef(path) {
@@ -44,7 +44,6 @@ function userRef(path) {
 }
 
 function setSyncIndicator(status) {
-  // status: 'synced' | 'syncing' | 'offline' | 'error'
   const el = document.getElementById('sync-indicator');
   if (!el) return;
   const icons  = { synced: '●', syncing: '◌', offline: '○', error: '⚠' };
@@ -55,7 +54,7 @@ function setSyncIndicator(status) {
 }
 
 // ═══════════════════════════════════════════
-//  AUTH FUNCTIONS  (called from HTML)
+//  AUTH FUNCTIONS
 // ═══════════════════════════════════════════
 window.fbSignIn = async function () {
   const email    = document.getElementById('auth-email').value.trim();
@@ -117,14 +116,10 @@ function attachListeners() {
     if (_remotePause) return;
     const val = snapshot.val();
     if (val === null) {
-      // First login on this device — push local data up
-      if (state.stories.length > 0) {
-        fbSaveStories(state.stories);
-      }
+      if (state.stories.length > 0) fbSaveStories(state.stories);
       return;
     }
     const remote = Array.isArray(val) ? val : Object.values(val);
-    // Only update if actually different (avoid flicker)
     if (JSON.stringify(remote) !== JSON.stringify(state.stories)) {
       state.stories = remote;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(remote));
@@ -150,10 +145,13 @@ function attachListeners() {
       ...val,
       options: { ...DEFAULT_SETTINGS.options, ...(val.options || {}) },
       categories: Array.isArray(val.categories) ? val.categories : [...DEFAULT_CATEGORIES],
+      customThemes: Array.isArray(val.customThemes) ? val.customThemes : [],
     };
     if (JSON.stringify(merged) !== JSON.stringify(state.settings)) {
       state.settings = merged;
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
+      // Re-inject all custom theme styles since we got fresh data
+      injectAllCustomThemes();
       applyAllSettings();
       if (state.view === 'admin') renderAdmin();
     }
@@ -168,7 +166,7 @@ function detachListeners() {
 }
 
 // ═══════════════════════════════════════════
-//  WRITE FUNCTIONS  (called from data.js)
+//  WRITE FUNCTIONS
 // ═══════════════════════════════════════════
 window.fbSaveStories = async function (stories) {
   if (!fbUser) return;
@@ -201,7 +199,7 @@ window.fbSaveSettings = async function (settings) {
 };
 
 // ═══════════════════════════════════════════
-//  AUTH STATE OBSERVER  (bootstrap)
+//  AUTH STATE OBSERVER
 // ═══════════════════════════════════════════
 onAuthStateChanged(auth, user => {
   if (user) {

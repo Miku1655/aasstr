@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS = {
   cards: 'default',
   siteName: 'The Private Library',
   categories: [...DEFAULT_CATEGORIES],
+  customThemes: [],
   options: {
     wordcount: true,
     progress: true,
@@ -60,6 +61,104 @@ function highlight(text, query) {
 }
 
 // ═══════════════════════════════════════════
+//  CUSTOM THEME HELPERS
+// ═══════════════════════════════════════════
+function getAllThemes() {
+  return [...THEMES, ...(state.settings.customThemes || [])];
+}
+
+function getThemeById(id) {
+  return getAllThemes().find(t => t.id === id);
+}
+
+// Derive computed colors from a base theme definition
+// A "full" custom theme stores all CSS variable values
+function injectCustomThemeStyle(theme) {
+  const styleId = 'custom-theme-' + theme.id;
+  let el = document.getElementById(styleId);
+  if (!el) {
+    el = document.createElement('style');
+    el.id = styleId;
+    document.head.appendChild(el);
+  }
+
+  // Compute accent2/accent3 as lighter versions automatically if not provided
+  const a2 = theme.accent2 || lighten(theme.accent, 20);
+  const a3 = theme.accent3 || lighten(theme.accent, 40);
+  const g2 = theme.gold2   || lighten(theme.gold, 20);
+  const t2  = theme.text2  || mix(theme.text, theme.bg, 0.4);
+  const t3  = theme.text3  || mix(theme.text, theme.bg, 0.65);
+  const rbg = theme.readingBg   || '#f7f0e8';
+  const rt  = theme.readingText || '#1c1715';
+  const rt2 = theme.readingText2|| '#4a3f39';
+  const bg3 = theme.bg3    || mix(theme.bg2, theme.bg, 0.5);
+
+  el.textContent = `[data-theme="${theme.id}"] {
+    --bg: ${theme.bg};
+    --bg2: ${theme.bg2};
+    --bg3: ${bg3};
+    --border: ${theme.border};
+    --accent: ${theme.accent};
+    --accent2: ${a2};
+    --accent3: ${a3};
+    --gold: ${theme.gold};
+    --gold2: ${g2};
+    --text: ${theme.text || '#e2d8d0'};
+    --text2: ${t2};
+    --text3: ${t3};
+    --reading-bg: ${rbg};
+    --reading-text: ${rt};
+    --reading-text2: ${rt2};
+    --sidebar-width: 220px;
+    --font-display: 'Cormorant Garamond', serif;
+    --font-body: 'EB Garamond', Georgia, serif;
+    --font-mono: 'Inconsolata', monospace;
+    --radius: 2px;
+  }
+  [data-theme="${theme.id}"] .sidebar-item.active {
+    background: ${hexToRgba(theme.accent, 0.08)};
+  }
+  [data-theme="${theme.id}"] .card-tag {
+    background: ${hexToRgba(theme.accent, 0.12)};
+    border: 1px solid ${hexToRgba(theme.accent, 0.25)};
+    color: ${a3};
+  }
+  [data-theme="${theme.id}"] .layout-btn.active,
+  [data-theme="${theme.id}"] .filter-tag.active {
+    background: ${hexToRgba(theme.accent, 0.15)};
+  }`;
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function lighten(hex, amount) {
+  let r = parseInt(hex.slice(1,3),16);
+  let g = parseInt(hex.slice(3,5),16);
+  let b = parseInt(hex.slice(5,7),16);
+  r = Math.min(255, r + amount * 3);
+  g = Math.min(255, g + amount * 2);
+  b = Math.min(255, b + amount * 3);
+  return '#' + [r,g,b].map(v => Math.round(v).toString(16).padStart(2,'0')).join('');
+}
+
+function mix(hex1, hex2, t) {
+  // t=0 -> hex1, t=1 -> hex2
+  const r1=parseInt(hex1.slice(1,3),16), g1=parseInt(hex1.slice(3,5),16), b1=parseInt(hex1.slice(5,7),16);
+  const r2=parseInt(hex2.slice(1,3),16), g2=parseInt(hex2.slice(3,5),16), b2=parseInt(hex2.slice(5,7),16);
+  const r=Math.round(r1+(r2-r1)*t), g=Math.round(g1+(g2-g1)*t), b=Math.round(b1+(b2-b1)*t);
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+function injectAllCustomThemes() {
+  (state.settings.customThemes || []).forEach(injectCustomThemeStyle);
+}
+
+// ═══════════════════════════════════════════
 //  DATA LAYER  (localStorage + Firebase)
 // ═══════════════════════════════════════════
 function loadData() {
@@ -69,26 +168,25 @@ function loadData() {
 
 function saveData(stories) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(stories));
-  // Push to Firebase if signed in
   if (window.fbSaveStories) window.fbSaveStories(stories);
 }
 
 function loadSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
-    if (!saved) return { ...DEFAULT_SETTINGS, categories: [...DEFAULT_CATEGORIES] };
+    if (!saved) return { ...DEFAULT_SETTINGS, categories: [...DEFAULT_CATEGORIES], customThemes: [] };
     return {
       ...DEFAULT_SETTINGS,
       ...saved,
       options: { ...DEFAULT_SETTINGS.options, ...(saved.options || {}) },
       categories: Array.isArray(saved.categories) ? saved.categories : [...DEFAULT_CATEGORIES],
+      customThemes: Array.isArray(saved.customThemes) ? saved.customThemes : [],
     };
-  } catch { return { ...DEFAULT_SETTINGS, categories: [...DEFAULT_CATEGORIES] }; }
+  } catch { return { ...DEFAULT_SETTINGS, categories: [...DEFAULT_CATEGORIES], customThemes: [] }; }
 }
 
 function saveSettings() {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
-  // Push to Firebase if signed in
   if (window.fbSaveSettings) window.fbSaveSettings(state.settings);
 }
 
