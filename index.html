@@ -2,453 +2,589 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>The Private Library</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inconsolata:wght@300;400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&family=Josefin+Sans:wght@300;400;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;600&family=Special+Elite&family=Abril+Fatface&family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,300;0,400;1,300&family=Crimson+Pro:ital,wght@0,300;0,400;1,400&family=Spectral:ital,wght@0,300;0,400;1,300&family=Gilda+Display&family=Cinzel:wght@400;600&family=UnifrakturMaguntia&family=Sorts+Mill+Goudy:ital@0;1&family=Cardo:ital,wght@0,400;0,700;1,400&family=Arvo:ital,wght@0,400;0,700;1,400&family=Bitter:ital,wght@0,300;0,400;1,300&family=Fjord+One&family=Philosopher:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <style>
-  /* ── Auth Overlay ── */
-  #auth-overlay {
-    position: fixed; inset: 0; z-index: 9999;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .auth-box {
-    background: var(--bg2); border: 1px solid var(--border);
-    padding: 2.5rem 2rem; width: 100%; max-width: 380px;
-    border-radius: var(--radius);
-  }
-  .auth-logo {
-    font-family: var(--font-display); font-size: 1.4rem; font-weight: 300;
-    color: var(--gold); letter-spacing: 0.12em; text-align: center; margin-bottom: 0.25rem;
-  }
-  .auth-logo span { color: var(--accent2); }
-  .auth-tagline {
-    text-align: center; font-family: var(--font-mono); font-size: 0.65rem;
-    letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase;
-    margin-bottom: 2rem;
-  }
-  .auth-field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.9rem; }
-  .auth-label {
-    font-family: var(--font-mono); font-size: 0.65rem;
-    letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3);
-  }
-  .auth-input {
-    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-    padding: 0.55rem 0.75rem; font-family: var(--font-body); font-size: 1rem;
-    border-radius: var(--radius); outline: none; transition: border-color 0.15s;
-  }
-  .auth-input:focus { border-color: var(--accent); }
-  .auth-btn {
-    width: 100%; padding: 0.65rem; margin-top: 0.5rem; cursor: pointer;
-    font-family: var(--font-display); font-size: 0.9rem;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    background: var(--accent); border: 1px solid var(--accent); color: #fff;
-    border-radius: var(--radius); transition: all 0.2s;
-  }
-  .auth-btn:hover:not(:disabled) { background: var(--accent2); border-color: var(--accent2); }
-  .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .auth-btn-ghost {
-    width: 100%; padding: 0.55rem; margin-top: 0.35rem; cursor: pointer;
-    font-family: var(--font-display); font-size: 0.82rem;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    background: none; border: 1px solid var(--border); color: var(--text2);
-    border-radius: var(--radius); transition: all 0.2s;
-  }
-  .auth-btn-ghost:hover:not(:disabled) { border-color: var(--accent2); color: var(--accent3); }
-  .auth-btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
-  .auth-error {
-    font-family: var(--font-mono); font-size: 0.75rem; color: #c46a7a;
-    min-height: 1.1em; margin-top: 0.4rem; text-align: center;
-  }
-  .auth-divider {
-    border: none; border-top: 1px solid var(--border); margin: 1rem 0;
-  }
+/* ══════════════════════════════════════════════════════════
+   MOBILE-FIRST BASE RESETS + TOUCH HELPERS
+══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
 
-  /* ── Sync indicator ── */
-  #sync-indicator {
-    font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em;
-    padding: 0.2rem 0.6rem; border-radius: 20px;
-    border: 1px solid var(--border); cursor: default; user-select: none;
-    transition: all 0.3s; display: none;
-  }
-  #sync-indicator[data-status="synced"]  { color: #4caf80; border-color: #2a6b50; }
-  #sync-indicator[data-status="syncing"] { color: var(--text3); border-color: var(--border); }
-  #sync-indicator[data-status="offline"] { color: var(--text3); border-color: var(--border); }
-  #sync-indicator[data-status="error"]   { color: #c46a7a; border-color: #5a1a22; }
+/* Prevent iOS zoom on input focus */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+  font-size: 16px !important; /* iOS won't zoom if ≥16px */
+}
 
-  /* ── User chip ── */
-  #user-chip {
-    display: flex; align-items: center; gap: 0.5rem;
-    font-family: var(--font-mono); font-size: 0.7rem; color: var(--text3);
-  }
-  #user-email-display {
-    max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .signout-btn {
-    background: none; border: 1px solid var(--border); color: var(--text3);
-    padding: 0.2rem 0.55rem; font-family: var(--font-mono); font-size: 0.65rem;
-    letter-spacing: 0.08em; cursor: pointer; border-radius: var(--radius);
-    transition: all 0.15s;
-  }
-  .signout-btn:hover { border-color: #5a1a22; color: #c46a7a; }
+/* Safe-area insets for notched phones */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
 
-  /* ── Theme editor modal sizing ── */
-  #theme-editor-modal .modal {
-    max-width: 780px;
-    max-height: 92vh;
-    overflow-y: auto;
-  }
+/* ── Auth Overlay ── */
+#auth-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+}
+.auth-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  padding: 2.5rem 2rem; width: 100%; max-width: 380px;
+  border-radius: var(--radius);
+}
+.auth-logo {
+  font-family: var(--font-display); font-size: 1.4rem; font-weight: 300;
+  color: var(--gold); letter-spacing: 0.12em; text-align: center; margin-bottom: 0.25rem;
+}
+.auth-logo span { color: var(--accent2); }
+.auth-tagline {
+  text-align: center; font-family: var(--font-mono); font-size: 0.65rem;
+  letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+.auth-field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.9rem; }
+.auth-label {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3);
+}
+.auth-input {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  padding: 0.75rem 0.75rem; font-family: var(--font-body); font-size: 1rem;
+  border-radius: var(--radius); outline: none; transition: border-color 0.15s;
+  width: 100%; -webkit-appearance: none;
+}
+.auth-input:focus { border-color: var(--accent); }
+.auth-btn {
+  width: 100%; padding: 0.75rem; margin-top: 0.5rem; cursor: pointer;
+  font-family: var(--font-display); font-size: 0.9rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  background: var(--accent); border: 1px solid var(--accent); color: #fff;
+  border-radius: var(--radius); transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 44px;
+}
+.auth-btn:hover:not(:disabled) { background: var(--accent2); border-color: var(--accent2); }
+.auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.auth-btn-ghost {
+  width: 100%; padding: 0.65rem; margin-top: 0.35rem; cursor: pointer;
+  font-family: var(--font-display); font-size: 0.82rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  background: none; border: 1px solid var(--border); color: var(--text2);
+  border-radius: var(--radius); transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 44px;
+}
+.auth-btn-ghost:hover:not(:disabled) { border-color: var(--accent2); color: var(--accent3); }
+.auth-btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+.auth-error {
+  font-family: var(--font-mono); font-size: 0.75rem; color: #c46a7a;
+  min-height: 1.1em; margin-top: 0.4rem; text-align: center;
+}
+.auth-divider {
+  border: none; border-top: 1px solid var(--border); margin: 1rem 0;
+}
 
-  /* ══════════════════════════════════════════
-     FONT SELECTOR inside Theme Editor
-  ══════════════════════════════════════════ */
-  .te-font-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+/* ── Sync indicator ── */
+#sync-indicator {
+  font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em;
+  padding: 0.2rem 0.6rem; border-radius: 20px;
+  border: 1px solid var(--border); cursor: default; user-select: none;
+  transition: all 0.3s; display: none;
+}
+#sync-indicator[data-status="synced"]  { color: #4caf80; border-color: #2a6b50; }
+#sync-indicator[data-status="syncing"] { color: var(--text3); border-color: var(--border); }
+#sync-indicator[data-status="offline"] { color: var(--text3); border-color: var(--border); }
+#sync-indicator[data-status="error"]   { color: #c46a7a; border-color: #5a1a22; }
+
+/* ── User chip ── */
+#user-chip {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-mono); font-size: 0.7rem; color: var(--text3);
+}
+#user-email-display {
+  max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.signout-btn {
+  background: none; border: 1px solid var(--border); color: var(--text3);
+  padding: 0.2rem 0.55rem; font-family: var(--font-mono); font-size: 0.65rem;
+  letter-spacing: 0.08em; cursor: pointer; border-radius: var(--radius);
+  transition: all 0.15s; min-height: 32px; touch-action: manipulation;
+}
+.signout-btn:hover { border-color: #5a1a22; color: #c46a7a; }
+
+/* ── Theme editor modal sizing ── */
+#theme-editor-modal .modal {
+  max-width: 780px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+/* ══════════════════════════════════════════
+   MOBILE HEADER
+══════════════════════════════════════════ */
+/* Hamburger button */
+#mobile-menu-btn {
+  display: none;
+  background: none; border: none; cursor: pointer; color: var(--text2);
+  padding: 0.5rem; border-radius: var(--radius); touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+#mobile-menu-btn svg { display: block; }
+
+/* Mobile bottom navigation bar */
+#mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 200;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 0.4rem 0;
+  padding-bottom: calc(0.4rem + env(safe-area-inset-bottom));
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: stretch;
+}
+.mob-nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.2rem; flex: 1; padding: 0.35rem 0.25rem;
+  background: none; border: none; cursor: pointer; color: var(--text3);
+  font-family: var(--font-mono); font-size: 0.55rem; letter-spacing: 0.05em;
+  text-transform: uppercase; transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.mob-nav-item.active { color: var(--accent3); }
+.mob-nav-item svg { width: 20px; height: 20px; }
+
+/* Mobile sidebar drawer */
+#mobile-drawer {
+  display: none;
+  position: fixed; inset: 0; z-index: 300;
+}
+#mobile-drawer-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
+}
+#mobile-drawer-panel {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: min(280px, 80vw);
+  background: var(--bg2); border-right: 1px solid var(--border);
+  overflow-y: auto; overflow-x: hidden;
+  transform: translateX(-100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 1.5rem 0 2rem;
+}
+#mobile-drawer.open #mobile-drawer-panel {
+  transform: translateX(0);
+}
+#mobile-drawer-close {
+  position: absolute; top: 1rem; right: 1rem;
+  background: none; border: 1px solid var(--border); color: var(--text3);
+  width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-drawer-logo {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 300;
+  color: var(--gold); letter-spacing: 0.12em; padding: 0 1.25rem 1.25rem;
+  border-bottom: 1px solid var(--border); margin-bottom: 0.75rem;
+}
+.mob-drawer-logo span { color: var(--accent2); }
+
+/* Mobile search bar (below header on mobile) */
+#mobile-search-bar {
+  display: none;
+  padding: 0.5rem 1rem;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+#mobile-search-bar .header-search-inner {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 0.5rem 0.75rem;
+}
+#mobile-search-input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-family: var(--font-body); font-size: 0.9rem;
+  flex: 1; width: 100%;
+}
+
+/* Mobile add story FAB */
+#mobile-fab {
+  display: none;
+  position: fixed; bottom: calc(70px + env(safe-area-inset-bottom)); right: 1rem;
+  z-index: 190;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--accent); border: none; color: #fff;
+  font-size: 1.5rem; line-height: 1; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  display: none; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  transition: background 0.2s, transform 0.15s;
+}
+#mobile-fab:active { transform: scale(0.95); }
+
+/* ══════════════════════════════════════════
+   FONT SELECTOR inside Theme Editor
+══════════════════════════════════════════ */
+.te-font-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.te-font-card {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: var(--bg3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.te-font-card:hover { border-color: var(--accent); background: var(--bg2); }
+.te-font-card.selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg2));
+}
+.te-font-card-name {
+  font-family: var(--font-mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3);
+}
+.te-font-card-display { font-size: 1.05rem; color: var(--text); line-height: 1.2; }
+.te-font-card-body { font-size: 0.72rem; color: var(--text2); line-height: 1.3; font-style: italic; }
+.te-font-card.selected .te-font-card-name::after { content: " ✓"; color: var(--accent3); }
+
+/* ══════════════════════════════════════════
+   LAYOUT OPTIONS — dramatic variants
+══════════════════════════════════════════ */
+
+/* ── Magazine layout ── */
+body[data-layout="magazine"] #main-inner { display: block; }
+body[data-layout="magazine"] #sidebar { display: none !important; }
+body[data-layout="magazine"] #top-nav {
+  display: flex !important; align-items: center; gap: 0.5rem;
+  padding: 0.6rem 2rem; background: var(--bg2);
+  border-bottom: 1px solid var(--border); overflow-x: auto; flex-shrink: 0;
+}
+body[data-layout="magazine"] #content { max-width: none; padding: 0; }
+body[data-layout="magazine"] .story-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0; padding: 0;
+}
+body[data-layout="magazine"] .story-card { border-radius: 0; border-right: none; border-bottom: none; }
+body[data-layout="magazine"] .story-card:first-child {
+  grid-column: 1 / -1; display: grid;
+  grid-template-columns: 1fr 1fr; min-height: 260px; border-bottom: 1px solid var(--border);
+}
+body[data-layout="magazine"] .story-grid { border: 1px solid var(--border); }
+body[data-layout="magazine"] .story-card { border: 1px solid var(--border); }
+
+/* ── Codex layout (right sidebar) ── */
+body[data-layout="codex"] #main-inner { flex-direction: row-reverse; }
+body[data-layout="codex"] #sidebar {
+  display: flex !important; border-left: 1px solid var(--border); border-right: none;
+}
+body[data-layout="codex"] #top-nav { display: none !important; }
+
+/* ── Immersive layout ── */
+body[data-layout="immersive"] #main-inner { display: block; }
+body[data-layout="immersive"] #sidebar { display: none !important; }
+body[data-layout="immersive"] #top-nav { display: none !important; }
+body[data-layout="immersive"] #content { padding: 0; max-width: none; }
+body[data-layout="immersive"] .story-grid { display: flex; flex-direction: column; gap: 0; padding: 0; }
+body[data-layout="immersive"] .story-card {
+  border-radius: 0; border-left: none; border-right: none; border-top: none;
+  padding: 2rem 4rem; display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 2rem; transition: background 0.2s;
+}
+body[data-layout="immersive"] .story-card:hover { background: var(--bg2); }
+body[data-layout="immersive"] .library-header,
+body[data-layout="immersive"] .toolbar { padding-left: 4rem; padding-right: 4rem; }
+
+/* ── Manuscript layout ── */
+body[data-layout="manuscript"] #main-inner { display: block; }
+body[data-layout="manuscript"] #sidebar { display: none !important; }
+body[data-layout="manuscript"] #top-nav { display: none !important; }
+body[data-layout="manuscript"] #content { max-width: 680px; margin: 0 auto; padding: 2rem 1rem; }
+body[data-layout="manuscript"] .story-grid { display: flex; flex-direction: column; gap: 0; padding: 0; }
+body[data-layout="manuscript"] .story-card {
+  border-radius: 0; border-left: none; border-right: none; border-top: none;
+  padding: 1.5rem 0; display: flex; flex-direction: column; gap: 0.4rem;
+}
+body[data-layout="manuscript"] .story-card:first-child { border-top: 1px solid var(--border); }
+body[data-layout="manuscript"] .library-header {
+  padding: 2rem 0 1rem; border-bottom: 2px solid var(--gold); margin-bottom: 0;
+}
+
+/* ── Folio layout ── */
+body[data-layout="folio"] #main-inner { display: grid; grid-template-columns: 56px 1fr; }
+body[data-layout="folio"] #sidebar {
+  display: flex !important; flex-direction: column; width: 56px; min-width: 56px;
+  padding: 1rem 0; align-items: center; overflow: hidden; border-right: 1px solid var(--border);
+}
+body[data-layout="folio"] .sidebar-label,
+body[data-layout="folio"] .sidebar-count,
+body[data-layout="folio"] #sidebar-categories { display: none !important; }
+body[data-layout="folio"] .sidebar-item {
+  width: 40px; height: 40px; justify-content: center; padding: 0;
+  border-radius: 6px; margin-bottom: 0.25rem;
+}
+body[data-layout="folio"] .sidebar-item svg { margin: 0; }
+body[data-layout="folio"] #top-nav { display: none !important; }
+body[data-layout="folio"] .story-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+
+/* Layout preview thumbnails */
+.layout-btn-visual {
+  display: flex; flex-direction: column; align-items: stretch; gap: 0;
+  width: 100%; aspect-ratio: 16/10; background: var(--bg3);
+  border-radius: 3px; overflow: hidden; margin-bottom: 0.4rem;
+}
+.lv-header { height: 14%; background: var(--bg2); border-bottom: 1px solid var(--border); }
+.lv-body { flex: 1; display: flex; }
+.lv-sidebar { background: color-mix(in srgb, var(--bg2) 80%, var(--bg)); border-right: 1px solid var(--border); }
+.lv-sidebar-right { background: color-mix(in srgb, var(--bg2) 80%, var(--bg)); border-left: 1px solid var(--border); }
+.lv-content { flex: 1; padding: 4px; display: flex; flex-direction: column; gap: 3px; }
+.lv-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 1px; flex: 1; }
+.lv-card-hero { background: color-mix(in srgb, var(--accent) 15%, var(--bg2)); border: 1px solid var(--border); border-radius: 1px; height: 40%; }
+.lv-cards-row { display: flex; gap: 3px; flex: 1; }
+.lv-list-item { background: var(--bg2); border-bottom: 1px solid var(--border); height: 12px; }
+.lv-icon-col { width: 14px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding-top: 4px; gap: 4px; }
+.lv-icon-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+.lv-col-content { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 4px; }
+.lv-ms-content { max-width: 60%; margin: 0 auto; flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 4px 0; }
+
+.layout-btn {
+  display: flex; flex-direction: column; align-items: stretch;
+  padding: 0.5rem !important; height: auto !important; gap: 0.3rem; cursor: pointer;
+}
+.layout-btn-label {
+  font-family: var(--font-mono); font-size: 0.63rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text2); text-align: center;
+}
+.layout-btn.active .layout-btn-label { color: var(--accent3); }
+
+.layout-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 0.25rem;
+}
+.layout-grid-wide { grid-template-columns: repeat(4, 1fr); }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+══════════════════════════════════════════ */
+
+/* ── Tablet: ≤ 900px ── */
+@media (max-width: 900px) {
+  /* Compress header */
+  #header {
+    padding: 0 1rem;
     gap: 0.5rem;
-    margin-top: 0.5rem;
   }
-  .te-font-card {
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 0.6rem 0.75rem;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-    background: var(--bg3);
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
+  #header-search {
+    flex: 1;
+    min-width: 0;
   }
-  .te-font-card:hover {
-    border-color: var(--accent);
-    background: var(--bg2);
-  }
-  .te-font-card.selected {
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 12%, var(--bg2));
-  }
-  .te-font-card-name {
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text3);
-  }
-  .te-font-card-display {
-    font-size: 1.05rem;
-    color: var(--text);
-    line-height: 1.2;
-  }
-  .te-font-card-body {
-    font-size: 0.72rem;
-    color: var(--text2);
-    line-height: 1.3;
-    font-style: italic;
-  }
-  /* Selected check badge */
-  .te-font-card.selected .te-font-card-name::after {
-    content: " ✓";
-    color: var(--accent3);
-  }
+  /* Hide import/export and admin text buttons, show only icons */
+  .hbtn-ghost { display: none; }
+  #header-actions { gap: 0.5rem; }
 
-  /* ══════════════════════════════════════════
-     LAYOUT OPTIONS — new dramatic variants
-  ══════════════════════════════════════════ */
+  /* Sidebar collapses */
+  #sidebar { display: none !important; }
+  #main-inner { display: block !important; }
 
-  /* ── Magazine layout ── */
-  body[data-layout="magazine"] #main-inner {
-    display: block;
-  }
-  body[data-layout="magazine"] #sidebar {
-    display: none !important;
-  }
-  body[data-layout="magazine"] #top-nav {
-    display: flex !important;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 2rem;
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    flex-shrink: 0;
-  }
-  body[data-layout="magazine"] #content {
-    max-width: none;
-    padding: 0;
-  }
-  body[data-layout="magazine"] .story-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 0;
-    padding: 0;
-  }
-  body[data-layout="magazine"] .story-card {
-    border-radius: 0;
-    border-right: none;
-    border-bottom: none;
-  }
-  /* Magazine hero: first card gets a giant featured treatment */
-  body[data-layout="magazine"] .story-card:first-child {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 260px;
-    border-bottom: 1px solid var(--border);
-  }
-  body[data-layout="magazine"] .story-grid {
-    border: 1px solid var(--border);
-    border-collapse: collapse;
-  }
-  body[data-layout="magazine"] .story-card {
-    border: 1px solid var(--border);
-  }
-
-  /* ── Codex layout (right sidebar) ── */
-  body[data-layout="codex"] #main-inner {
-    flex-direction: row-reverse;
-  }
-  body[data-layout="codex"] #sidebar {
-    display: flex !important;
-    border-left: 1px solid var(--border);
-    border-right: none;
-    writing-mode: initial;
-  }
-  body[data-layout="codex"] #top-nav { display: none !important; }
-
-  /* ── Immersive layout (full-bleed, cinema) ── */
-  body[data-layout="immersive"] #main-inner {
-    display: block;
-  }
-  body[data-layout="immersive"] #sidebar {
-    display: none !important;
-  }
-  body[data-layout="immersive"] #top-nav {
-    display: none !important;
-  }
-  body[data-layout="immersive"] #content {
-    padding: 0;
-    max-width: none;
-  }
-  body[data-layout="immersive"] .story-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    padding: 0;
-  }
-  body[data-layout="immersive"] .story-card {
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    padding: 2rem 4rem;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 2rem;
-    transition: background 0.2s;
-  }
-  body[data-layout="immersive"] .story-card:hover {
-    background: var(--bg2);
-  }
+  /* Reduce immersive padding */
+  body[data-layout="immersive"] .story-card { padding: 1.5rem 2rem; }
   body[data-layout="immersive"] .library-header,
-  body[data-layout="immersive"] .toolbar {
-    padding-left: 4rem;
-    padding-right: 4rem;
+  body[data-layout="immersive"] .toolbar { padding-left: 2rem; padding-right: 2rem; }
+
+  /* Layout grid for admin */
+  .layout-grid { grid-template-columns: repeat(2, 1fr); }
+  .layout-grid-wide { grid-template-columns: repeat(3, 1fr); }
+
+  /* Font grid: single column */
+  .te-font-grid { grid-template-columns: 1fr; }
+
+  /* Theme editor modal layout stacks */
+  .te-layout { flex-direction: column !important; }
+}
+
+/* ── Mobile: ≤ 640px ── */
+@media (max-width: 640px) {
+  /* ---- Header ---- */
+  #header {
+    padding: 0 0.75rem;
+    height: 52px;
+    gap: 0.5rem;
+  }
+  #logo { font-size: 1rem; letter-spacing: 0.05em; }
+  #logo-main-text { display: none; } /* Show just "The Private" on very small screens */
+
+  /* Hide desktop search bar in header on mobile */
+  #header-search { display: none; }
+
+  /* Hide user chip email on mobile */
+  #user-email-display { display: none; }
+
+  /* Show hamburger */
+  #mobile-menu-btn { display: flex; }
+
+  /* Show mobile search bar */
+  #mobile-search-bar { display: block; }
+
+  /* Show mobile bottom nav */
+  #mobile-nav { display: flex; }
+
+  /* Show mobile FAB */
+  #mobile-fab { display: flex; }
+
+  /* Shrink + button to icon only in header */
+  .hbtn-solid { 
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
   }
 
-  /* ── Manuscript layout (centered column, narrow) ── */
-  body[data-layout="manuscript"] #main-inner {
-    display: block;
+  /* Push app content above bottom nav */
+  #app { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+
+  /* ---- Main content ---- */
+  #main { padding-bottom: 0; }
+  #content { padding: 0 0 1rem; }
+
+  /* ---- Story grid ---- */
+  .story-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+    padding: 0 !important;
   }
-  body[data-layout="manuscript"] #sidebar {
-    display: none !important;
+  .story-card {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    padding: 1rem !important;
   }
-  body[data-layout="manuscript"] #top-nav {
-    display: none !important;
-  }
-  body[data-layout="manuscript"] #content {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-  }
-  body[data-layout="manuscript"] .story-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    padding: 0;
-  }
-  body[data-layout="manuscript"] .story-card {
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    padding: 1.5rem 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-  body[data-layout="manuscript"] .story-card:first-child {
-    border-top: 1px solid var(--border);
-  }
-  body[data-layout="manuscript"] .library-header {
-    padding: 2rem 0 1rem;
-    border-bottom: 2px solid var(--gold);
+  .story-card:first-child { border-top: 1px solid var(--border) !important; }
+
+  /* ---- Library header ---- */
+  .library-header { padding: 1rem 1rem 0.5rem; }
+  .library-title { font-size: 1.4rem !important; }
+  .toolbar { padding: 0.5rem 1rem; }
+
+  /* ---- Reader ---- */
+  .reader-nav { padding: 0.75rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
+  .reader-header { padding: 1.5rem 1rem 1rem; }
+  .reader-title { font-size: 1.6rem !important; }
+  .reader-body-wrapper { padding: 0 1rem 2rem !important; }
+  .reader-font-controls { display: none; } /* hidden on mobile — use pinch zoom */
+
+  /* ---- Editor ---- */
+  .editor-header { padding: 0.75rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
+  .form-grid { padding: 1rem; gap: 0.75rem; }
+  .form-group.full { grid-column: 1 !important; }
+  .form-grid { grid-template-columns: 1fr !important; }
+  .form-actions { padding: 1rem; gap: 0.5rem; }
+  #content-textarea { min-height: 200px; }
+
+  /* ---- Admin ---- */
+  .admin-header { padding: 0.75rem 1rem; }
+  .admin-sections { padding: 1rem; gap: 1rem; }
+  .admin-section { padding: 1rem; }
+  .layout-grid { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+  .layout-grid-wide { grid-template-columns: repeat(2, 1fr); }
+  .te-font-grid { grid-template-columns: 1fr; }
+  .option-row { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+
+  /* ---- Modals ---- */
+  .modal-overlay { padding: 0.75rem; align-items: flex-end; }
+  .modal {
+    max-height: 85vh; overflow-y: auto;
+    border-radius: var(--radius) var(--radius) 0 0;
+    width: 100%; max-width: 100%;
     margin-bottom: 0;
   }
-
-  /* ── Folio layout (2-col split: narrow nav + content) ── */
-  body[data-layout="folio"] #main-inner {
-    display: grid;
-    grid-template-columns: 56px 1fr;
+  #theme-editor-modal .modal {
+    max-width: 100%; border-radius: var(--radius) var(--radius) 0 0;
   }
-  body[data-layout="folio"] #sidebar {
+  .te-layout { flex-direction: column !important; }
+
+  /* ---- Tag cloud ---- */
+  .tag-cloud { padding: 1rem; }
+
+  /* ---- Author view ---- */
+  .author-header { padding: 1.5rem 1rem 1rem; }
+
+  /* ---- Stats bar ---- */
+  .stats-bar { padding: 0.4rem 1rem; font-size: 0.65rem; gap: 0.5rem; flex-wrap: wrap; }
+
+  /* ---- Immersive layout ---- */
+  body[data-layout="immersive"] .story-card {
+    padding: 1rem !important;
+    grid-template-columns: 1fr !important;
     display: flex !important;
-    flex-direction: column;
-    width: 56px;
-    min-width: 56px;
-    padding: 1rem 0;
-    align-items: center;
-    overflow: hidden;
-    border-right: 1px solid var(--border);
+    flex-direction: column !important;
+    gap: 0.5rem !important;
   }
-  body[data-layout="folio"] .sidebar-label,
-  body[data-layout="folio"] .sidebar-count,
-  body[data-layout="folio"] #sidebar-categories { display: none !important; }
-  body[data-layout="folio"] .sidebar-item {
-    width: 40px; height: 40px;
-    justify-content: center;
-    padding: 0;
-    border-radius: 6px;
-    margin-bottom: 0.25rem;
-  }
-  body[data-layout="folio"] .sidebar-item svg { margin: 0; }
-  body[data-layout="folio"] #top-nav { display: none !important; }
-  body[data-layout="folio"] .story-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  body[data-layout="immersive"] .library-header,
+  body[data-layout="immersive"] .toolbar { padding-left: 1rem; padding-right: 1rem; }
+
+  /* ---- Magazine layout first card hero ---- */
+  body[data-layout="magazine"] .story-card:first-child {
+    grid-template-columns: 1fr !important;
+    min-height: 160px;
   }
 
-  /* Layout preview thumbnails in admin */
-  .layout-btn-visual {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    width: 100%;
-    aspect-ratio: 16/10;
-    background: var(--bg3);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 0.4rem;
-  }
-  .lv-header {
-    height: 14%;
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-  }
-  .lv-body {
-    flex: 1;
-    display: flex;
-  }
-  .lv-sidebar {
-    background: color-mix(in srgb, var(--bg2) 80%, var(--bg));
-    border-right: 1px solid var(--border);
-  }
-  .lv-sidebar-right {
-    background: color-mix(in srgb, var(--bg2) 80%, var(--bg));
-    border-left: 1px solid var(--border);
-  }
-  .lv-content {
-    flex: 1;
-    padding: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .lv-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 1px;
-    flex: 1;
-  }
-  .lv-card-hero {
-    background: color-mix(in srgb, var(--accent) 15%, var(--bg2));
-    border: 1px solid var(--border);
-    border-radius: 1px;
-    height: 40%;
-  }
-  .lv-cards-row {
-    display: flex;
-    gap: 3px;
-    flex: 1;
-  }
-  .lv-list-item {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    height: 12px;
-  }
-  .lv-icon-col {
-    width: 14px;
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 4px;
-    gap: 4px;
-  }
-  .lv-icon-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--border);
-  }
-  .lv-col-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 4px;
-  }
-  .lv-ms-content {
-    max-width: 60%;
-    margin: 0 auto;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 4px 0;
-  }
+  /* ---- Folio layout hides icon sidebar on mobile ---- */
+  body[data-layout="folio"] #main-inner { grid-template-columns: 1fr !important; }
+  body[data-layout="folio"] #sidebar { display: none !important; }
+}
 
-  /* Enhanced layout-btn to include visual thumbnail */
-  .layout-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0.5rem !important;
-    height: auto !important;
-    gap: 0.3rem;
-    cursor: pointer;
-  }
-  .layout-btn-label {
-    font-family: var(--font-mono);
-    font-size: 0.63rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text2);
-    text-align: center;
-  }
-  .layout-btn.active .layout-btn-label { color: var(--accent3); }
+/* ── Very small: ≤ 380px ── */
+@media (max-width: 380px) {
+  .auth-box { padding: 1.5rem 1.25rem; }
+  .mob-nav-item { font-size: 0.5rem; }
+  .mob-nav-item svg { width: 18px; height: 18px; }
+}
 
-  .layout-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
-    margin-top: 0.25rem;
-  }
-  .layout-grid-wide {
-    grid-template-columns: repeat(4, 1fr);
-  }
+/* ══════════════════════════════════════════
+   TOUCH-FRIENDLY INTERACTIONS
+══════════════════════════════════════════ */
+button, .sidebar-item, .story-card, .back-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Minimum touch target size */
+.sidebar-item { min-height: 44px; }
+.hbtn { min-height: 36px; }
+.back-btn { min-height: 36px; padding: 0.4rem 0.75rem; }
+
+/* Prevent text selection on tap */
+.mob-nav-item, .sidebar-item, #mobile-menu-btn { user-select: none; }
+
+/* Scroll momentum on iOS */
+#sidebar, #mobile-drawer-panel, .modal, #content {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ══════════════════════════════════════════
+   PRINT / REDUCED MOTION
+══════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
 </style>
 </head>
 <body data-theme="crimson" data-layout="default" data-cards="default">
@@ -459,16 +595,18 @@
     <div class="auth-logo">The <span>Private</span> Library</div>
     <div class="auth-tagline">Sign in to sync your library</div>
     <div class="auth-field">
-      <label class="auth-label">Email</label>
+      <label class="auth-label" for="auth-email">Email</label>
       <input type="email" class="auth-input" id="auth-email" placeholder="you@example.com"
+             autocomplete="email" inputmode="email"
              onkeydown="if(event.key==='Enter')fbSignIn()">
     </div>
     <div class="auth-field">
-      <label class="auth-label">Password</label>
+      <label class="auth-label" for="auth-password">Password</label>
       <input type="password" class="auth-input" id="auth-password" placeholder="••••••••"
+             autocomplete="current-password"
              onkeydown="if(event.key==='Enter')fbSignIn()">
     </div>
-    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-error" id="auth-error" role="alert"></div>
     <button class="auth-btn" id="auth-submit" onclick="fbSignIn()">Sign In</button>
     <hr class="auth-divider">
     <button class="auth-btn-ghost" id="auth-register-btn" onclick="fbRegister()">Create Account</button>
@@ -480,13 +618,22 @@
 
 <!-- ── Header ── -->
 <header id="header">
+  <!-- Hamburger (mobile only) -->
+  <button id="mobile-menu-btn" onclick="openMobileDrawer()" aria-label="Open navigation" aria-expanded="false">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
   <div id="logo" onclick="showView('library')">The <span id="logo-accent">Private</span><span id="logo-main-text"> Library</span></div>
+
   <div id="header-search">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
-    <input type="text" id="search-input" placeholder="Search titles, authors, tags…" oninput="handleSearch(this.value)">
+    <input type="text" id="search-input" placeholder="Search titles, authors, tags…" oninput="handleSearch(this.value)" autocomplete="off">
   </div>
+
   <div id="header-actions">
     <span id="sync-indicator" data-status="syncing">◌ Syncing…</span>
     <div id="user-chip">
@@ -499,11 +646,23 @@
   </div>
 </header>
 
+<!-- ── Mobile Search Bar (below header) ── -->
+<div id="mobile-search-bar">
+  <div class="header-search-inner">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="search" id="mobile-search-input" class="form-input" placeholder="Search stories…"
+           oninput="handleSearch(this.value); syncSearchInputs(this)" autocomplete="off"
+           style="background:none;border:none;outline:none;flex:1;font-size:0.95rem;color:var(--text);font-family:var(--font-body)">
+  </div>
+</div>
+
 <div id="main">
   <nav id="top-nav" style="display:none"></nav>
 
   <div id="main-inner">
-    <!-- ── Sidebar ── -->
+    <!-- ── Sidebar (desktop) ── -->
     <nav id="sidebar">
       <div class="sidebar-section">
         <div class="sidebar-label">Browse</div>
@@ -560,7 +719,7 @@
         <div class="reader-nav">
           <button class="back-btn" onclick="showView('library')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-            Back to Library
+            Back
           </button>
           <div class="reader-font-controls">
             <span>Aa</span>
@@ -600,34 +759,34 @@
           </button>
           <h1 class="editor-title-text" id="editor-title-text">Add New Story</h1>
           <div id="editor-delete-btn" style="margin-left:auto;display:none">
-            <button class="btn btn-danger" onclick="deleteCurrentStory()">Delete Story</button>
+            <button class="btn btn-danger" onclick="deleteCurrentStory()">Delete</button>
           </div>
         </div>
         <div class="form-grid">
           <div class="form-group full">
-            <label class="form-label">Title</label>
-            <input type="text" class="form-input" id="f-title" placeholder="Story title…">
+            <label class="form-label" for="f-title">Title</label>
+            <input type="text" class="form-input" id="f-title" placeholder="Story title…" autocomplete="off">
           </div>
           <div class="form-group">
-            <label class="form-label">Author</label>
-            <input type="text" class="form-input" id="f-author" placeholder="Author name or pseudonym…">
+            <label class="form-label" for="f-author">Author</label>
+            <input type="text" class="form-input" id="f-author" placeholder="Author name…" autocomplete="off">
           </div>
           <div class="form-group">
-            <label class="form-label">Category</label>
+            <label class="form-label" for="f-category">Category</label>
             <select class="form-select" id="f-category">
               <option value="">Select category…</option>
             </select>
           </div>
           <div class="form-group full">
-            <label class="form-label">Summary</label>
+            <label class="form-label" for="f-summary">Summary</label>
             <textarea class="form-textarea" id="f-summary" placeholder="Brief description or teaser…" rows="3"></textarea>
           </div>
           <div class="form-group full">
-            <label class="form-label">Tags <span class="form-hint">(comma-separated)</span></label>
-            <input type="text" class="form-input" id="f-tags" placeholder="e.g. slow burn, power dynamics, explicit…">
+            <label class="form-label" for="f-tags">Tags <span class="form-hint">(comma-separated)</span></label>
+            <input type="text" class="form-input" id="f-tags" placeholder="e.g. slow burn, power dynamics…" autocomplete="off">
           </div>
           <div class="form-group full">
-            <label class="form-label">Story Content</label>
+            <label class="form-label" for="content-textarea">Story Content</label>
             <textarea class="form-textarea" id="content-textarea" placeholder="Paste or write your story here…"></textarea>
           </div>
         </div>
@@ -665,16 +824,16 @@
         <div class="admin-header">
           <button class="back-btn" onclick="showView('library')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-            Back to Library
+            Back
           </button>
-          <h1 class="admin-title">Site Administration</h1>
+          <h1 class="admin-title">Administration</h1>
         </div>
         <div class="admin-sections">
 
           <div class="admin-section">
             <div class="admin-section-title">Site Identity</div>
             <div class="form-group" style="margin-bottom:1rem">
-              <label class="form-label">Site Name</label>
+              <label class="form-label" for="admin-site-name">Site Name</label>
               <div class="site-name-row">
                 <input type="text" class="site-name-input" id="admin-site-name" placeholder="The Private Library">
                 <button class="btn btn-primary" onclick="saveSiteName()" style="white-space:nowrap">Apply</button>
@@ -695,9 +854,8 @@
 
           <div class="admin-section">
             <div class="admin-section-title">Layout</div>
-            <p style="font-size:0.78rem;color:var(--text3);margin-bottom:0.75rem">Choose a structural layout — each dramatically changes how the library is organized and navigated.</p>
+            <p style="font-size:0.78rem;color:var(--text3);margin-bottom:0.75rem">Choose a structural layout for the library.</p>
 
-            <!-- Primary layouts (sidebar variants) -->
             <div class="form-label" style="margin-bottom:0.5rem">Sidebar Position</div>
             <div class="layout-grid" id="layout-grid">
 
@@ -707,12 +865,8 @@
                   <div class="lv-body">
                     <div class="lv-sidebar" style="width:28%"></div>
                     <div class="lv-content">
-                      <div class="lv-cards-row">
-                        <div class="lv-card"></div><div class="lv-card"></div>
-                      </div>
-                      <div class="lv-cards-row">
-                        <div class="lv-card"></div><div class="lv-card"></div>
-                      </div>
+                      <div class="lv-cards-row"><div class="lv-card"></div><div class="lv-card"></div></div>
+                      <div class="lv-cards-row"><div class="lv-card"></div><div class="lv-card"></div></div>
                     </div>
                   </div>
                 </div>
@@ -739,12 +893,8 @@
                   <div class="lv-body">
                     <div class="lv-sidebar" style="width:18%"></div>
                     <div class="lv-content">
-                      <div class="lv-cards-row">
-                        <div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div>
-                      </div>
-                      <div class="lv-cards-row">
-                        <div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div>
-                      </div>
+                      <div class="lv-cards-row"><div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div></div>
+                      <div class="lv-cards-row"><div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div></div>
                     </div>
                   </div>
                 </div>
@@ -756,12 +906,8 @@
                   <div class="lv-header"></div>
                   <div class="lv-body">
                     <div class="lv-content" style="padding:6px">
-                      <div class="lv-cards-row">
-                        <div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div>
-                      </div>
-                      <div class="lv-cards-row">
-                        <div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div>
-                      </div>
+                      <div class="lv-cards-row"><div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div></div>
+                      <div class="lv-cards-row"><div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div></div>
                     </div>
                   </div>
                 </div>
@@ -769,22 +915,16 @@
               </button>
             </div>
 
-            <!-- Alternative structural layouts -->
             <div class="form-label" style="margin-bottom:0.5rem;margin-top:1.25rem">Alternative Structures</div>
             <div class="layout-grid layout-grid-wide" id="layout-grid-alt">
 
-              <!-- Codex: right-side nav -->
               <button class="layout-btn" data-layout="codex" onclick="setLayout('codex',this)">
                 <div class="layout-btn-visual">
                   <div class="lv-header"></div>
                   <div class="lv-body">
                     <div class="lv-content">
-                      <div class="lv-cards-row">
-                        <div class="lv-card"></div><div class="lv-card"></div>
-                      </div>
-                      <div class="lv-cards-row">
-                        <div class="lv-card"></div><div class="lv-card"></div>
-                      </div>
+                      <div class="lv-cards-row"><div class="lv-card"></div><div class="lv-card"></div></div>
+                      <div class="lv-cards-row"><div class="lv-card"></div><div class="lv-card"></div></div>
                     </div>
                     <div class="lv-sidebar-right" style="width:28%"></div>
                   </div>
@@ -792,7 +932,6 @@
                 <div class="layout-btn-label">Codex (Right Nav)</div>
               </button>
 
-              <!-- Magazine: editorial top-nav + hero card -->
               <button class="layout-btn" data-layout="magazine" onclick="setLayout('magazine',this)">
                 <div class="layout-btn-visual">
                   <div class="lv-header"></div>
@@ -803,15 +942,12 @@
                   </div>
                   <div class="lv-body" style="flex-direction:column;gap:3px;padding:4px">
                     <div class="lv-card-hero"></div>
-                    <div class="lv-cards-row">
-                      <div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div>
-                    </div>
+                    <div class="lv-cards-row"><div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div></div>
                   </div>
                 </div>
                 <div class="layout-btn-label">Magazine</div>
               </button>
 
-              <!-- Immersive: cinematic full-width list -->
               <button class="layout-btn" data-layout="immersive" onclick="setLayout('immersive',this)">
                 <div class="layout-btn-visual">
                   <div class="lv-header"></div>
@@ -826,7 +962,6 @@
                 <div class="layout-btn-label">Immersive</div>
               </button>
 
-              <!-- Manuscript: narrow centered column -->
               <button class="layout-btn" data-layout="manuscript" onclick="setLayout('manuscript',this)">
                 <div class="layout-btn-visual">
                   <div class="lv-header"></div>
@@ -843,7 +978,6 @@
                 <div class="layout-btn-label">Manuscript</div>
               </button>
 
-              <!-- Folio: icon-only sidebar -->
               <button class="layout-btn" data-layout="folio" onclick="setLayout('folio',this)">
                 <div class="layout-btn-visual">
                   <div class="lv-header"></div>
@@ -855,12 +989,8 @@
                       <div class="lv-icon-dot"></div>
                     </div>
                     <div class="lv-col-content">
-                      <div class="lv-cards-row">
-                        <div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div>
-                      </div>
-                      <div class="lv-cards-row">
-                        <div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div>
-                      </div>
+                      <div class="lv-cards-row"><div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div></div>
+                      <div class="lv-cards-row"><div class="lv-card"></div><div class="lv-card"></div><div class="lv-card"></div></div>
                     </div>
                   </div>
                 </div>
@@ -869,7 +999,6 @@
 
             </div>
 
-            <!-- Card style -->
             <div class="form-label" style="margin-bottom:0.5rem;margin-top:1.25rem">Card Style</div>
             <div class="layout-grid" id="cards-grid">
               <button class="layout-btn active" data-cards="default" onclick="setCards('default',this)">
@@ -891,7 +1020,8 @@
             <div class="admin-section-title">Categories</div>
             <div class="cat-list" id="admin-cat-list"></div>
             <div class="cat-add-row">
-              <input type="text" class="cat-add-input" id="new-cat-input" placeholder="New category name…" onkeydown="if(event.key==='Enter')addCategory()">
+              <input type="text" class="cat-add-input" id="new-cat-input" placeholder="New category name…"
+                     onkeydown="if(event.key==='Enter')addCategory()" autocomplete="off">
               <button class="cat-add-btn" onclick="addCategory()">Add</button>
             </div>
           </div>
@@ -924,11 +1054,11 @@
             <div class="admin-section-title">Danger Zone</div>
             <div class="option-row">
               <div><div class="option-label" style="color:#c46a7a">Reset All Settings</div><div class="option-desc">Restore defaults for theme, layout, and categories</div></div>
-              <button class="btn btn-danger" onclick="resetSettings()">Reset Settings</button>
+              <button class="btn btn-danger" onclick="resetSettings()">Reset</button>
             </div>
             <div class="option-row">
               <div><div class="option-label" style="color:#c46a7a">Clear All Stories</div><div class="option-desc">Permanently delete all stories from the library</div></div>
-              <button class="btn btn-danger" onclick="clearAllStories()">Clear Library</button>
+              <button class="btn btn-danger" onclick="clearAllStories()">Clear</button>
             </div>
           </div>
 
@@ -938,6 +1068,92 @@
     </div><!-- /content -->
   </div><!-- /main-inner -->
 </div><!-- /main -->
+
+<!-- ── Mobile Bottom Navigation ── -->
+<nav id="mobile-nav" role="navigation" aria-label="Mobile navigation">
+  <button class="mob-nav-item active" id="mob-nav-all" onclick="filterCategory(null);closeMobileDrawer();setMobNavActive('mob-nav-all')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    All
+  </button>
+  <button class="mob-nav-item" id="mob-nav-favs" onclick="filterFavorites();closeMobileDrawer();setMobNavActive('mob-nav-favs')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    Favorites
+  </button>
+  <button class="mob-nav-item" id="mob-nav-unread" onclick="filterUnread();closeMobileDrawer();setMobNavActive('mob-nav-unread')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    Unread
+  </button>
+  <button class="mob-nav-item" id="mob-nav-tags" onclick="showView('tags');closeMobileDrawer();setMobNavActive('mob-nav-tags')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    Tags
+  </button>
+  <button class="mob-nav-item" id="mob-nav-admin" onclick="showView('admin');closeMobileDrawer();setMobNavActive('mob-nav-admin')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Admin
+  </button>
+</nav>
+
+<!-- ── Mobile Floating Action Button ── -->
+<button id="mobile-fab" onclick="openEditor()" aria-label="Add story" title="Add new story">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- ── Mobile Drawer ── -->
+<div id="mobile-drawer" role="dialog" aria-modal="true" aria-label="Navigation menu">
+  <div id="mobile-drawer-backdrop" onclick="closeMobileDrawer()"></div>
+  <div id="mobile-drawer-panel">
+    <button id="mobile-drawer-close" onclick="closeMobileDrawer()" aria-label="Close menu">✕</button>
+    <div class="mob-drawer-logo">The <span>Private</span> Library</div>
+
+    <!-- Mirror the sidebar content inside drawer -->
+    <div style="padding: 0 0.75rem;">
+      <div class="sidebar-label" style="padding: 0 0.5rem; margin-bottom: 0.25rem;">Browse</div>
+      <div class="sidebar-item" onclick="filterCategory(null);closeMobileDrawer()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        All Stories <span class="sidebar-count" id="drawer-count-all">0</span>
+      </div>
+      <div class="sidebar-item" onclick="filterFavorites();closeMobileDrawer()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Favorites <span class="sidebar-count" id="drawer-count-favs">0</span>
+      </div>
+      <div class="sidebar-item" onclick="filterUnread();closeMobileDrawer()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Unread <span class="sidebar-count" id="drawer-count-unread">0</span>
+      </div>
+      <div class="sidebar-item" onclick="showView('tags');closeMobileDrawer()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Tag Cloud
+      </div>
+
+      <div class="sidebar-divider" style="margin: 0.75rem 0;"></div>
+      <div class="sidebar-label" style="padding: 0 0.5rem; margin-bottom: 0.25rem;">Actions</div>
+      <div class="sidebar-item" onclick="openEditor();closeMobileDrawer()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Story
+      </div>
+      <div class="sidebar-item" onclick="showModal('io-modal');closeMobileDrawer()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import / Export
+      </div>
+      <div class="sidebar-item" onclick="showView('admin');closeMobileDrawer()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Admin Panel
+      </div>
+
+      <div class="sidebar-divider" style="margin: 0.75rem 0;"></div>
+      <!-- Categories populated by JS (mirror) -->
+      <div id="drawer-categories">
+        <div class="sidebar-label" style="padding: 0 0.5rem; margin-bottom: 0.25rem;">Categories</div>
+      </div>
+
+      <div style="padding: 1rem 0.5rem 0; border-top: 1px solid var(--border); margin-top: 0.5rem;">
+        <div id="drawer-user-chip" style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text3);margin-bottom:0.5rem"></div>
+        <button class="btn btn-secondary" style="width:100%;font-size:0.8rem" onclick="fbSignOut()">Sign Out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div><!-- /app -->
 
 <!-- Import/Export Modal -->
@@ -959,20 +1175,17 @@
   <div class="modal" style="max-width:780px;max-height:92vh;overflow-y:auto">
     <h2 id="te-modal-title">Create Theme</h2>
 
-    <!-- Name -->
     <div class="te-field" style="margin-bottom:1rem">
-      <label class="te-label">Theme Name</label>
-      <input type="text" class="te-name-input" id="te-name" placeholder="My Custom Theme" oninput="syncThemePreview()">
+      <label class="te-label" for="te-name">Theme Name</label>
+      <input type="text" class="te-name-input" id="te-name" placeholder="My Custom Theme" oninput="syncThemePreview()" autocomplete="off">
     </div>
 
-    <!-- Quick presets -->
     <div class="te-field" style="margin-bottom:1.25rem">
       <label class="te-label">Quick-start from built-in</label>
       <div class="te-presets" id="te-presets"></div>
     </div>
 
     <div class="te-layout">
-      <!-- Color fields -->
       <div class="te-fields">
         <label class="te-label" style="margin-bottom:0.25rem">Colors</label>
         <div class="te-color-grid">
@@ -1051,12 +1264,9 @@
 
         </div>
 
-        <!-- ═══ FONT SELECTOR ═══ -->
         <div style="margin-top:1.25rem">
           <label class="te-label" style="margin-bottom:0.5rem;display:block">Typography Pairing</label>
-          <div class="te-font-grid" id="te-font-grid">
-            <!-- Populated by JS -->
-          </div>
+          <div class="te-font-grid" id="te-font-grid"></div>
           <p style="font-size:0.75rem;color:var(--text3);font-style:italic;margin-top:0.5rem">
             Each pairing sets display, body, and monospace fonts throughout the library.
           </p>
@@ -1067,7 +1277,6 @@
         </p>
       </div>
 
-      <!-- Live preview -->
       <div class="te-preview-panel">
         <label class="te-label">Live Preview</label>
         <div id="te-preview-card">
@@ -1113,7 +1322,6 @@
           </div>
         </div>
 
-        <!-- Font preview sample text -->
         <div style="margin-top:0.75rem;padding:0.75rem;background:var(--bg3);border:1px solid var(--border);border-radius:3px">
           <div id="te-font-preview-display" style="font-size:1.1rem;color:var(--text);line-height:1.3;margin-bottom:0.3rem">The Moonlit Archive</div>
           <div id="te-font-preview-body" style="font-size:0.78rem;color:var(--text2);line-height:1.6;font-style:italic">"She turned the last page slowly, knowing that some stories are better left unfinished…"</div>
@@ -1130,7 +1338,7 @@
 </div>
 
 <!-- Toast -->
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script src="data.js"></script>
 <script src="settings.js"></script>
@@ -1139,112 +1347,122 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════
+//  MOBILE NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+
+function openMobileDrawer() {
+  const drawer = document.getElementById('mobile-drawer');
+  drawer.style.display = 'block';
+  // Force reflow then animate
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { drawer.classList.add('open'); });
+  });
+  document.getElementById('mobile-menu-btn').setAttribute('aria-expanded', 'true');
+  document.body.style.overflow = 'hidden';
+  // Sync counts into drawer
+  syncDrawerCounts();
+  syncDrawerCategories();
+  syncDrawerUser();
+}
+
+function closeMobileDrawer() {
+  const drawer = document.getElementById('mobile-drawer');
+  drawer.classList.remove('open');
+  document.getElementById('mobile-menu-btn').setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+  setTimeout(() => { drawer.style.display = 'none'; }, 260);
+}
+
+function setMobNavActive(id) {
+  document.querySelectorAll('.mob-nav-item').forEach(btn => btn.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+function syncDrawerCounts() {
+  const map = { 'count-all': 'drawer-count-all', 'count-favs': 'drawer-count-favs', 'count-unread': 'drawer-count-unread' };
+  for (const [src, dst] of Object.entries(map)) {
+    const s = document.getElementById(src), d = document.getElementById(dst);
+    if (s && d) d.textContent = s.textContent;
+  }
+}
+
+function syncDrawerCategories() {
+  const srcEl = document.getElementById('sidebar-categories');
+  const dstEl = document.getElementById('drawer-categories');
+  if (!srcEl || !dstEl) return;
+  dstEl.innerHTML = '<div class="sidebar-label" style="padding: 0 0.5rem; margin-bottom: 0.25rem;">Categories</div>';
+  const items = srcEl.querySelectorAll('.sidebar-item');
+  items.forEach(item => {
+    const clone = item.cloneNode(true);
+    // Wrap click to also close drawer
+    const origClick = clone.getAttribute('onclick') || '';
+    clone.setAttribute('onclick', origClick + '; closeMobileDrawer();');
+    dstEl.appendChild(clone);
+  });
+}
+
+function syncDrawerUser() {
+  const email = document.getElementById('user-email-display');
+  const chip = document.getElementById('drawer-user-chip');
+  if (email && chip) chip.textContent = email.textContent || '';
+}
+
+// Sync mobile search with desktop search and vice versa
+function syncSearchInputs(source) {
+  const desktop = document.getElementById('search-input');
+  const mobile = document.getElementById('mobile-search-input');
+  if (!desktop || !mobile) return;
+  if (source === desktop) mobile.value = desktop.value;
+  else if (source === mobile) desktop.value = mobile.value;
+  else { mobile.value = source.value; desktop.value = source.value; }
+}
+
+// Patch desktop search to also sync mobile
+document.addEventListener('DOMContentLoaded', () => {
+  const desktopSearch = document.getElementById('search-input');
+  if (desktopSearch) {
+    const origInput = desktopSearch.oninput;
+    desktopSearch.addEventListener('input', function() {
+      syncSearchInputs(this);
+    });
+  }
+
+  // Restore saved layout active state in both grids
+  const savedLayout = localStorage.getItem('pl-layout') || 'default';
+  syncLayoutBtnActive(savedLayout);
+
+  // Init drawer as hidden
+  document.getElementById('mobile-drawer').style.display = 'none';
+
+  // Escape key closes drawer
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeMobileDrawer();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════
 //  FONT PAIRINGS REGISTRY
-//  Each pairing defines display, body, and mono font families,
-//  plus Google Fonts CSS variable names that map to --font-* vars.
 // ═══════════════════════════════════════════════════════════════
 const FONT_PAIRINGS = [
-  {
-    id: 'default',
-    name: 'Classic Garamond',
-    displayFont: "'Cormorant Garamond', serif",
-    bodyFont:    "'EB Garamond', serif",
-    monoFont:    "'Inconsolata', monospace",
-    sampleDisplay: 'The Moonlit Archive',
-    sampleBody:    '"She turned the last page slowly…"',
-  },
-  {
-    id: 'playfair',
-    name: 'Playfair Lux',
-    displayFont: "'Playfair Display', serif",
-    bodyFont:    "'Lora', serif",
-    monoFont:    "'Inconsolata', monospace",
-    sampleDisplay: 'The Moonlit Archive',
-    sampleBody:    '"She turned the last page slowly…"',
-  },
-  {
-    id: 'gilda',
-    name: 'Gilda & Spectral',
-    displayFont: "'Gilda Display', serif",
-    bodyFont:    "'Spectral', serif",
-    monoFont:    "'Inconsolata', monospace",
-    sampleDisplay: 'The Moonlit Archive',
-    sampleBody:    '"She turned the last page slowly…"',
-  },
-  {
-    id: 'cinzel',
-    name: 'Cinzel Antiqua',
-    displayFont: "'Cinzel', serif",
-    bodyFont:    "'Cardo', serif",
-    monoFont:    "'Inconsolata', monospace",
-    sampleDisplay: 'The Moonlit Archive',
-    sampleBody:    '"She turned the last page slowly…"',
-  },
-  {
-    id: 'merriweather',
-    name: 'Merriweather',
-    displayFont: "'Libre Baskerville', serif",
-    bodyFont:    "'Merriweather', serif",
-    monoFont:    "'Inconsolata', monospace",
-    sampleDisplay: 'The Moonlit Archive',
-    sampleBody:    '"She turned the last page slowly…"',
-  },
-  {
-    id: 'dm-serif',
-    name: 'DM Serif Display',
-    displayFont: "'DM Serif Display', serif",
-    bodyFont:    "'Bitter', serif",
-    monoFont:    "'Inconsolata', monospace",
-    sampleDisplay: 'The Moonlit Archive',
-    sampleBody:    '"She turned the last page slowly…"',
-  },
-  {
-    id: 'philosopher',
-    name: 'Philosopher',
-    displayFont: "'Philosopher', serif",
-    bodyFont:    "'Crimson Pro', serif",
-    monoFont:    "'Inconsolata', monospace",
-    sampleDisplay: 'The Moonlit Archive',
-    sampleBody:    '"She turned the last page slowly…"',
-  },
-  {
-    id: 'josefin',
-    name: 'Josefin Sans',
-    displayFont: "'Josefin Sans', sans-serif",
-    bodyFont:    "'Raleway', sans-serif",
-    monoFont:    "'Inconsolata', monospace",
-    sampleDisplay: 'The Moonlit Archive',
-    sampleBody:    '"She turned the last page slowly…"',
-  },
-  {
-    id: 'special-elite',
-    name: 'Special Elite',
-    displayFont: "'Special Elite', serif",
-    bodyFont:    "'Libre Baskerville', serif",
-    monoFont:    "'Inconsolata', monospace",
-    sampleDisplay: 'The Moonlit Archive',
-    sampleBody:    '"She turned the last page slowly…"',
-  },
-  {
-    id: 'abril',
-    name: 'Abril Fatface',
-    displayFont: "'Abril Fatface', serif",
-    bodyFont:    "'Philosopher', serif",
-    monoFont:    "'Inconsolata', monospace",
-    sampleDisplay: 'The Moonlit Archive',
-    sampleBody:    '"She turned the last page slowly…"',
-  },
+  { id: 'default', name: 'Classic Garamond', displayFont: "'Cormorant Garamond', serif", bodyFont: "'EB Garamond', serif", monoFont: "'Inconsolata', monospace", sampleDisplay: 'The Moonlit Archive', sampleBody: '"She turned the last page slowly…"' },
+  { id: 'playfair', name: 'Playfair Lux', displayFont: "'Playfair Display', serif", bodyFont: "'Lora', serif", monoFont: "'Inconsolata', monospace", sampleDisplay: 'The Moonlit Archive', sampleBody: '"She turned the last page slowly…"' },
+  { id: 'gilda', name: 'Gilda & Spectral', displayFont: "'Gilda Display', serif", bodyFont: "'Spectral', serif", monoFont: "'Inconsolata', monospace", sampleDisplay: 'The Moonlit Archive', sampleBody: '"She turned the last page slowly…"' },
+  { id: 'cinzel', name: 'Cinzel Antiqua', displayFont: "'Cinzel', serif", bodyFont: "'Cardo', serif", monoFont: "'Inconsolata', monospace", sampleDisplay: 'The Moonlit Archive', sampleBody: '"She turned the last page slowly…"' },
+  { id: 'merriweather', name: 'Merriweather', displayFont: "'Libre Baskerville', serif", bodyFont: "'Merriweather', serif", monoFont: "'Inconsolata', monospace", sampleDisplay: 'The Moonlit Archive', sampleBody: '"She turned the last page slowly…"' },
+  { id: 'dm-serif', name: 'DM Serif Display', displayFont: "'DM Serif Display', serif", bodyFont: "'Bitter', serif", monoFont: "'Inconsolata', monospace", sampleDisplay: 'The Moonlit Archive', sampleBody: '"She turned the last page slowly…"' },
+  { id: 'philosopher', name: 'Philosopher', displayFont: "'Philosopher', serif", bodyFont: "'Crimson Pro', serif", monoFont: "'Inconsolata', monospace", sampleDisplay: 'The Moonlit Archive', sampleBody: '"She turned the last page slowly…"' },
+  { id: 'josefin', name: 'Josefin Sans', displayFont: "'Josefin Sans', sans-serif", bodyFont: "'Raleway', sans-serif", monoFont: "'Inconsolata', monospace", sampleDisplay: 'The Moonlit Archive', sampleBody: '"She turned the last page slowly…"' },
+  { id: 'special-elite', name: 'Special Elite', displayFont: "'Special Elite', serif", bodyFont: "'Libre Baskerville', serif", monoFont: "'Inconsolata', monospace", sampleDisplay: 'The Moonlit Archive', sampleBody: '"She turned the last page slowly…"' },
+  { id: 'abril', name: 'Abril Fatface', displayFont: "'Abril Fatface', serif", bodyFont: "'Philosopher', serif", monoFont: "'Inconsolata', monospace", sampleDisplay: 'The Moonlit Archive', sampleBody: '"She turned the last page slowly…"' },
 ];
 
-// ── Current selected font pairing ID while editing a theme
 let _editingFontPairing = 'default';
 
-// ── Render the font grid inside the theme editor
 function renderFontGrid(selectedId) {
   const grid = document.getElementById('te-font-grid');
   if (!grid) return;
   _editingFontPairing = selectedId || 'default';
-
   grid.innerHTML = FONT_PAIRINGS.map(p => `
     <div class="te-font-card ${p.id === _editingFontPairing ? 'selected' : ''}"
          onclick="selectFontPairing('${p.id}')" title="${p.name}">
@@ -1257,13 +1475,12 @@ function renderFontGrid(selectedId) {
 
 function selectFontPairing(id) {
   _editingFontPairing = id;
-  // Refresh grid selection state
   document.querySelectorAll('.te-font-card').forEach(c => {
-    c.classList.toggle('selected', c.getAttribute('onclick').includes(`'${id}'`));
+    // Check if the onclick contains this id
+    const onclick = c.getAttribute('onclick') || '';
+    c.classList.toggle('selected', onclick.includes(`'${id}'`));
   });
-  // Update live font preview
   updateFontPreview(id);
-  // Store on the editing theme object
   if (window._editingTheme) window._editingTheme.fontPairing = id;
 }
 
@@ -1275,17 +1492,8 @@ function updateFontPreview(id) {
   if (d) d.style.fontFamily = p.displayFont;
   if (b) b.style.fontFamily = p.bodyFont;
   if (m) m.style.fontFamily = p.monoFont;
-
-  // Also update the mini preview card
-  const prevTitle = document.querySelector('#te-preview-card [style*="font-family:var(--font-display)"]');
-  // We rely on CSS vars for the preview card – just poke the preview panel's inline styles
-  const panel = document.getElementById('te-preview-card');
-  if (panel) {
-    panel.style.setProperty('--preview-display-font', p.displayFont);
-  }
 }
 
-// ── Apply a font pairing to the live site (called on save / page load)
 function applyFontPairing(id) {
   const p = FONT_PAIRINGS.find(x => x.id === id) || FONT_PAIRINGS[0];
   document.documentElement.style.setProperty('--font-display', p.displayFont);
@@ -1293,7 +1501,6 @@ function applyFontPairing(id) {
   document.documentElement.style.setProperty('--font-mono',    p.monoFont);
 }
 
-// ── Load persisted font pairing on startup
 (function initFontPairing() {
   const saved = localStorage.getItem('pl-font-pairing') || 'default';
   applyFontPairing(saved);
@@ -1308,7 +1515,6 @@ function syncLayoutBtnActive(layoutId) {
   });
 }
 
-// Patch setLayout to keep both grids in sync
 const _origSetLayout = window.setLayout;
 window.setLayout = function(id, btn) {
   if (typeof _origSetLayout === 'function') _origSetLayout.call(this, id, btn);
@@ -1378,20 +1584,13 @@ function loadPreset(id) {
   window._editingTheme.accent = t.accent;
   window._editingTheme.gold   = t.gold;
   window._editingTheme.text   = t.text || '#e2d8d0';
-  document.getElementById('te-bg').value     = t.bg.toUpperCase();
-  document.getElementById('te-bg2').value    = t.bg2.toUpperCase();
-  document.getElementById('te-border').value = t.border.toUpperCase();
-  document.getElementById('te-accent').value = t.accent.toUpperCase();
-  document.getElementById('te-gold').value   = t.gold.toUpperCase();
-  document.getElementById('te-text').value   = (t.text || '#e2d8d0').toUpperCase();
-  COLOR_FIELDS.forEach(f => {
-    const val = document.getElementById('te-' + f).value;
-    updateSwatchUI(f, val);
+  ['bg','bg2','border','accent','gold','text'].forEach(f => {
+    const el = document.getElementById('te-' + f);
+    if (el) { el.value = (window._editingTheme[f] || '').toUpperCase(); updateSwatchUI(f, el.value); }
   });
   syncThemePreview();
 }
 
-// Override openThemeEditor to also populate font grid + presets
 const _origOpenThemeEditor = window.openThemeEditor;
 window.openThemeEditor = function(id) {
   if (typeof _origOpenThemeEditor === 'function') _origOpenThemeEditor.call(this, id);
@@ -1401,38 +1600,27 @@ window.openThemeEditor = function(id) {
       if (val) updateSwatchUI(f, val);
     });
     renderThemePresets();
-
-    // Load the font pairing from the theme being edited
     const currentFont = (window._editingTheme && window._editingTheme.fontPairing)
       ? window._editingTheme.fontPairing
       : (localStorage.getItem('pl-font-pairing') || 'default');
     renderFontGrid(currentFont);
     updateFontPreview(currentFont);
-
-    // Sync layout active states
     const currentLayout = document.body.dataset.layout || 'default';
     syncLayoutBtnActive(currentLayout);
   }, 0);
 };
 
-// Override saveCustomTheme to also persist font pairing
 const _origSaveCustomTheme = window.saveCustomTheme;
 window.saveCustomTheme = function() {
-  // Attach font pairing to the editing theme before saving
-  if (window._editingTheme) {
-    window._editingTheme.fontPairing = _editingFontPairing;
-  }
+  if (window._editingTheme) window._editingTheme.fontPairing = _editingFontPairing;
   if (typeof _origSaveCustomTheme === 'function') _origSaveCustomTheme.call(this);
-  // Persist and apply the font pairing
   localStorage.setItem('pl-font-pairing', _editingFontPairing);
   applyFontPairing(_editingFontPairing);
 };
 
-// Also apply font when a theme is selected from the theme grid (if it has a fontPairing)
 const _origApplyTheme = window.applyTheme;
 window.applyTheme = function(id) {
   if (typeof _origApplyTheme === 'function') _origApplyTheme.call(this, id);
-  // Check if this theme has a saved font pairing
   const savedThemes = JSON.parse(localStorage.getItem('pl-custom-themes') || '[]');
   const t = savedThemes.find(x => x.id === id);
   if (t && t.fontPairing) {
@@ -1440,6 +1628,47 @@ window.applyTheme = function(id) {
     applyFontPairing(t.fontPairing);
   }
 };
+
+// ═══════════════════════════════════════════
+//  BUG FIXES
+// ═══════════════════════════════════════════
+
+// Fix: Observe count changes in sidebar to keep drawer in sync
+(function observeCountSync() {
+  const observer = new MutationObserver(() => {
+    const drawer = document.getElementById('mobile-drawer');
+    if (drawer && drawer.classList.contains('open')) syncDrawerCounts();
+    // Always sync even if closed for next open
+    syncDrawerCounts();
+  });
+  ['count-all','count-favs','count-unread'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el, { childList: true, characterData: true, subtree: true });
+  });
+})();
+
+// Fix: Ensure modal overlays close on backdrop click (not just inside modals)
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) {
+      // Find modal id and close
+      closeModal(this.id);
+    }
+  });
+});
+
+// Fix: Prevent form submission default behavior on Enter key in auth
+document.addEventListener('DOMContentLoaded', () => {
+  const authForm = document.querySelector('.auth-box');
+  if (authForm) {
+    authForm.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
+        e.preventDefault();
+        if (typeof fbSignIn === 'function') fbSignIn();
+      }
+    });
+  }
+});
 </script>
 </body>
 </html>
